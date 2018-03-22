@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "org.opendaylight.telemetry.grpc.proto";
+option java_outer_classname = "TelemetryProto";
+
+package telemetry;
+
+service Telemetry {
+    rpc report(stream TelemetryStreamRequest) returns (TelemetryStreamResponse) {};
+}
+
+message KeyValue {
+    string key = 1;
+    oneof value {
+        uint64 int_value = 2;
+        string str_value = 3;
+    }
+}
+
+message TelemetryStreamRequest {
+    string system_id = 1;
+    uint64 timestamp = 2;
+    string key_prefix = 3;
+    repeated KeyValue kv = 4;
+}
+
+message TelemetryStreamResponse {}
