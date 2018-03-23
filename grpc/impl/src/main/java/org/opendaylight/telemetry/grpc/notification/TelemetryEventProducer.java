@@ -8,7 +8,7 @@
 package org.opendaylight.telemetry.grpc.notification;
 import com.lmax.disruptor.InsufficientCapacityException;
 import com.lmax.disruptor.RingBuffer;
-import org.opendaylight.telemetry.grpc.proto.TelemetryStreamRequest;
+import org.opendaylight.telemetry.channel.proto.TelemetryStreamRequest;
 
 import java.math.BigInteger;
 

@@ -12,7 +12,7 @@ import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import org.opendaylight.telemetry.grpc.proto.TelemetryStreamRequest;
+import org.opendaylight.telemetry.channel.proto.TelemetryStreamRequest;
 
 import java.util.concurrent.ThreadFactory;
 
