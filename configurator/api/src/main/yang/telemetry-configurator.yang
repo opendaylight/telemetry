@@ -1,0 +1,86 @@
+module telemetry-configurator {
+    yang-version 1.1;
+    namespace "urn:opendaylight:telemetry:params:xml:ns:yang:configurator";
+    prefix "telemetry-cfg";
+
+    import openconfig-telemetry { prefix oc-telemetry; }
+
+    revision "2017-11-20" {
+        description "Initial revision of configurator model";
+    }
+
+    grouping telemetry-destination-group {
+       leaf destination-group-id {
+          type string;
+       }
+    }
+
+    grouping telemetry-destination-specification {
+       list telemetry-destination-group {
+          key "destination-group-id";
+          ordered-by user;
+          uses telemetry-destination-group;
+
+          list destination-profile {
+             key "destination-address destination-port";
+             ordered-by user;
+             uses oc-telemetry:telemetry-stream-destination-config;
+          }
+       }
+    }
+
+    grouping node-identity {
+       leaf node-id {
+          type string;
+       }
+    }
+
+    grouping telemetry-subscription-specification {
+       list telemetry-subscription {
+          key "subscription-name";
+          ordered-by user;
+          uses oc-telemetry:telemetry-subscription-name-config;
+          leaf protocol-type {
+             type string;
+          }
+          leaf encoding-type {
+             type string;
+          }
+          uses oc-telemetry:telemetry-local-source-address-config;
+          uses oc-telemetry:telemetry-qos-marking-config;
+
+          //uses oc-telemetry:telemetry-stream-protocol-config;
+          //uses oc-telemetry:telemetry-stream-encoding-config;
+
+          list telemetry-sensor {
+             key "sensor-group-id";
+             ordered-by user;
+             uses oc-telemetry:telemetry-sensor-group-config;
+             uses oc-telemetry:telemetry-stream-subscription-config;
+          }
+
+          list telemetry-destination {
+             key "destination-group-id";
+             ordered-by user;
+             leaf destination-group-id {
+                type string;
+             }
+          }
+       }
+    }
+
+    grouping telemetry-node-subscription {
+       list telemetry-node {
+          key "node-id";
+          ordered-by user;
+          uses node-identity;
+          uses telemetry-subscription-specification;
+       }
+    }
+
+    container telemetry {
+       uses oc-telemetry:telemetry-sensor-specification;
+       uses telemetry-destination-specification;
+       uses telemetry-node-subscription;
+    }
+}

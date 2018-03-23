@@ -1,0 +1,186 @@
+module telemetry-configurator-api {
+    yang-version 1.1;
+    namespace "urn:opendaylight:telemetry:params:xml:ns:yang:configurator:api";
+    prefix "telemetry-cfg-api";
+
+    import openconfig-telemetry { prefix oc-telemetry; }
+    import telemetry-configurator { prefix telemetry-cfg; }
+
+    revision "2017-11-20" {
+        description "Initial revision of configurator model";
+    }
+
+    grouping configure-result {
+       container configure-result {
+          leaf result {
+             type enumeration {
+                enum SUCCESS;
+                enum FAILURE;
+             }
+          }
+          leaf errorCause {
+             type string;
+          }
+       }
+    }
+
+    rpc add-telemetry-sensor {
+        input {
+           uses oc-telemetry:telemetry-sensor-specification;
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc query-telemetry-sensor {
+        input {
+           //list telemetry-sensor {
+           //   key "sensor-group-id";
+           //   uses oc-telemetry:telemetry-sensor-group-config;
+           //}
+        }
+
+        output {
+           uses oc-telemetry:telemetry-sensor-specification;
+        }
+    }
+
+    rpc delete-telemetry-sensor {
+        input {
+           list telemetry-sensor-group {
+              key "sensor-group-id";
+              uses oc-telemetry:telemetry-sensor-group-config;
+           }
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc add-telemetry-destination {
+        input {
+           uses telemetry-cfg:telemetry-destination-specification;
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc query-telemetry-destination {
+        input {
+           //list telemetry-destination {
+           //   key "destination-group-id";
+           //   uses telemetry-cfg:telemetry-destination-group;
+           //}
+        }
+
+        output {
+           uses telemetry-cfg:telemetry-destination-specification;
+        }
+    }
+
+    rpc delete-telemetry-destination {
+        input {
+           list telemetry-destination-group {
+              key "destination-group-id";
+              uses telemetry-cfg:telemetry-destination-group;
+           }
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc configure-node-telemetry-subscription {
+        input {
+           uses telemetry-cfg:telemetry-node-subscription;
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc query-node-telemetry-subscription {
+        input {
+           //list telemetry-node {
+              //key "node-id";
+              //uses telemetry-cfg:node-identity;
+           //}
+        }
+
+        output {
+           uses telemetry-cfg:telemetry-node-subscription;
+        }
+    }
+
+    rpc delete-node-telemetry-subscription {
+        input {
+           list telemetry-node {
+              key "node-id";
+              uses telemetry-cfg:node-identity;
+
+              list telemetry-node-subscription {
+                 key "subscription-name";
+                 uses oc-telemetry:telemetry-subscription-name-config;
+              }
+           }
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc delete-node-telemetry-subscription-sensor {
+        input {
+           list telemetry-node {
+              key "node-id";
+              uses telemetry-cfg:node-identity;
+
+              list telemetry-node-subscription {
+                 key "subscription-name";
+                 uses oc-telemetry:telemetry-subscription-name-config;
+
+                 list telemetry-node-subscription-sensor {
+                    key "sensor-group-id";
+                    uses oc-telemetry:telemetry-sensor-group-config;
+                 }
+              }
+           }
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+    rpc delete-node-telemetry-subscription-destination {
+        input {
+           list telemetry-node {
+              key "node-id";
+              uses telemetry-cfg:node-identity;
+
+              list telemetry-node-subscription {
+                 key "subscription-name";
+                 uses oc-telemetry:telemetry-subscription-name-config;
+
+                 list telemetry-node-subscription-destination {
+                    key "destination-group-id";
+                    uses telemetry-cfg:telemetry-destination-group;
+                 }
+              }
+           }
+        }
+
+        output {
+           uses configure-result;
+        }
+    }
+
+}
