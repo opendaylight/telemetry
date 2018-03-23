@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * gRPC server that serve the Telemetry service.
@@ -43,11 +45,6 @@ public class TelemetryServer {
     public void start() throws IOException {
         server.start();
         LOG.info("Telemetry server started, listening on port " + port);
-        Runtime.getRuntime().addShutdownHook(new Thread(()->{
-            System.err.println("*** shutting down gRPC server since JVM is shutting down");
-            TelemetryServer.this.stop();
-            System.err.println("*** server shut down");
-        }));
     }
 
     /**
@@ -56,34 +53,41 @@ public class TelemetryServer {
     public void stop() {
         if (server != null) {
             server.shutdown();
-        }
-    }
-
-    /**
-     * Await termination on the main thread since the gRPC server uses daemon threads.
-     * @throws InterruptedException
-     */
-    public void blockUntilShutdown() throws InterruptedException {
-        if (server != null) {
-            server.awaitTermination();
+            LOG.info("Telemetry server stopped.");
         }
     }
 
     private static class TelemetryService extends TelemetryGrpc.TelemetryImplBase {
-        public StreamObserver<TelemetryStreamRequest> report(StreamObserver<TelemetryStreamResponse> responseObserver) {
+        private String getCollectorId() {
+            String hostname;
+            try {
+                hostname =  InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                hostname = "Unknown";
+            }
+            return hostname;
+        }
+
+        public StreamObserver<TelemetryStreamRequest> publish(StreamObserver<TelemetryStreamResponse> responseObserver) {
             return new StreamObserver<TelemetryStreamRequest>() {
                 @Override
                 public void onNext(TelemetryStreamRequest telemetryStreamRequest) {
+                    //TODO write tsdr
                     TelemetryNotification.publish(telemetryStreamRequest);
+                    TelemetryStreamResponse.Builder builder = TelemetryStreamResponse.newBuilder();
+                    builder.setCollectorId(getCollectorId());
+                    responseObserver.onNext(builder.build());
                 }
 
                 @Override
                 public void onError(Throwable throwable) {
-                    LOG.info("report error");
+                    LOG.error("Telemetry stream request error.");
+                    throwable.printStackTrace();
                 }
 
                 @Override
                 public void onCompleted() {
+                    LOG.info("Telemetry stream request completed.");
                     responseObserver.onCompleted();
                 }
             };
