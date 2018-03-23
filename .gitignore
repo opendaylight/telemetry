@@ -20,3 +20,5 @@ classes
 **/yang/gen
 maven-eclipse.xml
 .checkstyle
+*.ipr
+*.iws
