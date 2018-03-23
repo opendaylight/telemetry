@@ -11,9 +11,9 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.opendaylight.telemetry.grpc.notification.TelemetryNotification;
-import org.opendaylight.telemetry.grpc.proto.TelemetryGrpc;
-import org.opendaylight.telemetry.grpc.proto.TelemetryStreamRequest;
-import org.opendaylight.telemetry.grpc.proto.TelemetryStreamResponse;
+import org.opendaylight.telemetry.channel.proto.TelemetryGrpc;
+import org.opendaylight.telemetry.channel.proto.TelemetryStreamRequest;
+import org.opendaylight.telemetry.channel.proto.TelemetryStreamResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

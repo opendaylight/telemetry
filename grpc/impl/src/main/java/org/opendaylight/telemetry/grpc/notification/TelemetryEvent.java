@@ -8,7 +8,7 @@
 package org.opendaylight.telemetry.grpc.notification;
 
 import com.lmax.disruptor.EventFactory;
-import org.opendaylight.telemetry.grpc.proto.TelemetryStreamRequest;
+import org.opendaylight.telemetry.channel.proto.TelemetryStreamRequest;
 
 public class TelemetryEvent {
     public static TelemetryEventFactory FACTORY = new TelemetryEventFactory();

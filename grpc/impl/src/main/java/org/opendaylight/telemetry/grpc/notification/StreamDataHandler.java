@@ -7,7 +7,7 @@
  */
 package org.opendaylight.telemetry.grpc.notification;
 
-import org.opendaylight.telemetry.grpc.proto.TelemetryStreamRequest;
+import org.opendaylight.telemetry.channel.proto.TelemetryStreamRequest;
 
 public interface StreamDataHandler {
     void process(TelemetryStreamRequest data);
