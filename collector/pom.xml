@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </parent>
 
   <groupId>org.opendaylight.telemetry</groupId>
-  <artifactId>grpc-aggregator</artifactId>
+  <artifactId>collector-aggregator</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <name>ODL :: telemetry :: ${project.artifactId}</name> <!-- DO NOT CHANGE - Used by Sonar to set project name -->
   <packaging>pom</packaging>

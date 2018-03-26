@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>ODL :: telemetry :: ${project.artifactId}</name>
 
   <modules>
-    <module>odl-telemetry-grpc</module>
+    <module>odl-telemetry-collector</module>
     <module>odl-telemetry-configurator</module>
     <module>odl-telemetry-all</module>
     <module>features-telemetry</module>
