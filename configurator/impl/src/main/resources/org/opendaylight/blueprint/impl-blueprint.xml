@@ -10,6 +10,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
   xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
   odl:use-default-for-reference-types="true">
+  
+  <bean id="configuratorServiceImpl"
+        class="org.opendaylight.telemetry.configurator.impl.ConfiguratorServiceImpl">
+    
+  </bean>
 
 
 </blueprint>
