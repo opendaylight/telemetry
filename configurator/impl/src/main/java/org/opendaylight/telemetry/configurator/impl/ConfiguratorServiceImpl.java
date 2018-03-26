@@ -24,11 +24,14 @@ import org.slf4j.LoggerFactory;
 public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService {
     private static final Logger LOG = LoggerFactory.getLogger(ConfiguratorServiceImpl.class);
 
+    private DataProcessor dataProcessor;
     private static final String INPUT_NULL = "Input is null";
     private static final String SENSOR_GROUP_NULL = "There is no sensor group provided by input!";
     private static final String SENSOR_PATHS = " sensor paths not provided by input!";
+    private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
 
-    public ConfiguratorServiceImpl() {
+    public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
+        this.dataProcessor = dataProcessor;
     }
 
     @Override
@@ -52,6 +55,14 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
             }
         }
 
+        LOG.info("Check sensor group whether exist");
+        if (checkSensorGroupExistedInDataStore(sensorGroupList)) {
+            builder.setConfigureResult(getConfigResult(false, SENSOR_GROUP_EXIST));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        LOG.info("Write add telemetry sensor config to dataStore");
+        dataProcessor.addSensorGroupToDataStore(sensorGroupList);
         builder.setConfigureResult(getConfigResult(true, ""));
         return RpcResultBuilder.success(builder.build()).buildFuture();
     }
@@ -104,6 +115,24 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public Future<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>> deleteNodeTelemetrySubscriptionDestination(DeleteNodeTelemetrySubscriptionDestinationInput input) {
         return null;
+    }
+
+    private boolean checkSensorGroupExistedInDataStore(List<TelemetrySensorGroup> sensorGroupList) {
+        LOG.info("Get sensor group from data store");
+        List<TelemetrySensorGroup> allSensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
+
+        if (null == allSensorGroupList || allSensorGroupList.isEmpty()) {
+            return false;
+        }
+
+        for (TelemetrySensorGroup sensorGroup : sensorGroupList) {
+            for (TelemetrySensorGroup allSensorGroup : allSensorGroupList) {
+                if (sensorGroup.getTelemetrySensorGroupId().equals(allSensorGroup.getTelemetrySensorGroupId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private ConfigureResult getConfigResult(boolean result, String errorCause) {
