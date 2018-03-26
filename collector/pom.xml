@@ -22,8 +22,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <packaging>pom</packaging>
 
   <modules>
-    <module>api</module>
-    <module>impl</module>
+    <module>dataserver</module>
+    <module>datastorage</module>
   </modules>
 
   <!-- DO NOT install or deploy the repo root pom as it's only needed to initiate a build -->

@@ -36,7 +36,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>odl-telemetry-grpc</artifactId>
+      <artifactId>odl-telemetry-collector</artifactId>
       <version>${project.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
