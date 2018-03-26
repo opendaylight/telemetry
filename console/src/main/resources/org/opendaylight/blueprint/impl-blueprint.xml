@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright © 2017 ZTE, Inc. and others. All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+  odl:restart-dependents-on-updates="true" odl:use-default-for-reference-types="true">
+
+  <bean id="telemetryCommandsImpl"
+    class="com.zte.sdn.oscp.telemetry.console.impl.TelemetryCommandsImpl">
+  </bean>
+
+  <service ref="telemetryCommandsImpl" interface="com.zte.sdn.oscp.telemetry.console.api.TelemetryCommands" />
+
+  <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+    <command name="telemetry:list">
+        <action class="com.zte.sdn.oscp.telemetry.console.commands.TelemetryListStats">
+            <argument ref="telemetryCommandsImpl" />
+        </action>
+    </command>
+  </command-bundle>
+</blueprint>
