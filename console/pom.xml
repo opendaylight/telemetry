@@ -40,7 +40,7 @@
     </dependency>
     <dependency>
         <groupId>org.opendaylight.telemetry</groupId>
-        <artifactId>collector-impl</artifactId>
+        <artifactId>collector-dataserver</artifactId>
         <version>${project.version}</version>
     </dependency>
   </dependencies>
