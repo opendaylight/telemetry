@@ -16,6 +16,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult.Result;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String SENSOR_GROUP_NULL = "There is no sensor group provided by input!";
     private static final String SENSOR_PATHS = " sensor paths not provided by input!";
     private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
+    private static final String NO_SENSOR_GROUP = "No sensor group configured!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -69,7 +71,17 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<QueryTelemetrySensorOutput>> queryTelemetrySensor(QueryTelemetrySensorInput input) {
-        return null;
+        if (null == input) {
+            return rpcErr(INPUT_NULL);
+        }
+
+        List<TelemetrySensorGroup> allSensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        if (null == allSensorGroupList || allSensorGroupList.isEmpty()) {
+            return rpcErr(NO_SENSOR_GROUP);
+        }
+        QueryTelemetrySensorOutputBuilder builder = new QueryTelemetrySensorOutputBuilder();
+        builder.setTelemetrySensorGroup(allSensorGroupList);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
@@ -144,6 +156,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
             cfgResultBuilder.setErrorCause(errorCause);
         }
         return cfgResultBuilder.build();
+    }
+
+    private <T> Future<RpcResult<T>> rpcErr(String errMsg) {
+        return RpcResultBuilder.<T>failed().withError(RpcError.ErrorType.APPLICATION, errMsg).buildFuture();
     }
 
 }
