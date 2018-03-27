@@ -233,7 +233,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                       *
                   </Import-Package>
                   <Export-Package>
-                      org.opendaylight.telemetry.grpc.server.impl,
+                      org.opendaylight.telemetry.collector.dataserver,
                   </Export-Package>
                   <Embed-Dependency>
                       *;scope=compile|runtime;artifactId=!telemetry*|yang*|sal*|config*|guava;inline=true

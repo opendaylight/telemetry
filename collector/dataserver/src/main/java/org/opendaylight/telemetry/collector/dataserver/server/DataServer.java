@@ -82,7 +82,7 @@ public class DataServer {
         }
 
         /**
-         * Write to TSDR
+         * Write data to TSDR
          */
         private void dataStorage(TelemetryStreamRequest telemetryStreamRequest) {
             DataStoreInputBuilder inputBuilder = new DataStoreInputBuilder();
@@ -95,8 +95,8 @@ public class DataServer {
                     MetricRecordBuilder metricRecordBuilder = new MetricRecordBuilder();
                     List<RecordKeys> recordKeysList = new ArrayList<>();
                     RecordKeysBuilder recordKeysBuilder = new RecordKeysBuilder();
-                    recordKeysBuilder.setKeyName("Telemetry");
-                    recordKeysBuilder.setKeyValue(notification.getKeyPrefix() + "/" + keyValue.getKey());
+                    recordKeysBuilder.setKeyName("OCPath");
+                    recordKeysBuilder.setKeyValue(systemId + ":" + notification.getKeyPrefix() + "/" + keyValue.getKey());
                     recordKeysList.add(recordKeysBuilder.build());
 
                     metricRecordBuilder.setRecordKeys(recordKeysList);

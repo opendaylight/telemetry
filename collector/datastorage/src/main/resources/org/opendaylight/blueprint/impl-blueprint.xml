@@ -15,16 +15,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
     odl:type="default" />
 
-  <odl:rpc-service id = "insertMetric" interface="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang
-  .controller.config.tsdr.collector.spi.rev150915.TsdrCollectorSpiService"/>
+  <odl:rpc-service id = "insertMetric" interface="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.TsdrCollectorSpiService"/>
 
-  <bean id="provider"
-    class="org.opendaylight.telemetry.grpc.server.GrpcProvider"
+  <bean id="datastorage"
+    class="org.opendaylight.telemetry.collector.datastorage.DataStorageServiceImpl"
     init-method="init" destroy-method="close">
     <argument ref="dataBroker" />
     <argument ref="insertMetric" />
   </bean>
 
-  <odl:rpc-implementation ref="provider" />
-
+  <odl:rpc-implementation ref="datastorage" />
 </blueprint>
