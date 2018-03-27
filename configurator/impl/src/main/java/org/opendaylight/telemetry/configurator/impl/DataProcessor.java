@@ -123,4 +123,8 @@ public class DataProcessor {
         return submitResult;
     }
 
+    public void deleteSensorGroupFromDataStore(String sensorGroupId) {
+        operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSensorGroupPath(sensorGroupId));
+    }
+
 }

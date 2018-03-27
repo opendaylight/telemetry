@@ -31,6 +31,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String SENSOR_PATHS = " sensor paths not provided by input!";
     private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
     private static final String NO_SENSOR_GROUP = "No sensor group configured!";
+    private static final String SENSOR_GROUP_ID_NULL = "There is no sensor group id provided by input!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -86,7 +87,22 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<DeleteTelemetrySensorOutput>> deleteTelemetrySensor(DeleteTelemetrySensorInput input) {
-        return null;
+        DeleteTelemetrySensorOutputBuilder builder = new DeleteTelemetrySensorOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+        if (null == input.getTelemetrySensorGroup() || input.getTelemetrySensorGroup().isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, SENSOR_GROUP_ID_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (int i = 0; i < input.getTelemetrySensorGroup().size(); i++) {
+            dataProcessor.deleteSensorGroupFromDataStore(input.getTelemetrySensorGroup().get(i).getSensorGroupId());
+        }
+
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
