@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import java.util.List;
 
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.TelemetryDestinationGroup;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult;
@@ -32,6 +33,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
     private static final String NO_SENSOR_GROUP = "No sensor group configured!";
     private static final String SENSOR_GROUP_ID_NULL = "There is no sensor group id provided by input!";
+
+    private static final String DES_GROUP_NULL = "There is no destination group provided by input!";
+    private static final String DES_FILE = " destination profile not provided by input!";
+    private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -107,7 +112,33 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<AddTelemetryDestinationOutput>> addTelemetryDestination(AddTelemetryDestinationInput input) {
-        return null;
+        AddTelemetryDestinationOutputBuilder builder = new AddTelemetryDestinationOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+        List<TelemetryDestinationGroup> destinationGroupList = input.getTelemetryDestinationGroup();
+        if (null == destinationGroupList || destinationGroupList.isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, DES_GROUP_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+        for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
+            if (null == destinationGroup.getDestinationProfile() || destinationGroup.getDestinationProfile().isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, destinationGroup.getDestinationGroupId() + DES_FILE));
+                return RpcResultBuilder.success(builder.build()).buildFuture();
+            }
+        }
+
+        LOG.info("Check destination group whether exist");
+        if (checkDesGroupExistedInDataStore(destinationGroupList)) {
+            builder.setConfigureResult(getConfigResult(false, DES_GROUP_EXIST));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        LOG.info("Write add telemetry sensor config to dataStore");
+        dataProcessor.addDestinationGroupToDataStore(destinationGroupList);
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
@@ -156,6 +187,24 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         for (TelemetrySensorGroup sensorGroup : sensorGroupList) {
             for (TelemetrySensorGroup allSensorGroup : allSensorGroupList) {
                 if (sensorGroup.getTelemetrySensorGroupId().equals(allSensorGroup.getTelemetrySensorGroupId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkDesGroupExistedInDataStore(List<TelemetryDestinationGroup> destinationGroupList) {
+        LOG.info("Get destination group from data store");
+        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor.getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+
+        if (null == allDestinationGroupList || allDestinationGroupList.isEmpty()) {
+            return false;
+        }
+
+        for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
+            for (TelemetryDestinationGroup allDestinationGroup : allDestinationGroupList) {
+                if (destinationGroup.getDestinationGroupId().equals(allDestinationGroup.getDestinationGroupId())) {
                     return true;
                 }
             }
