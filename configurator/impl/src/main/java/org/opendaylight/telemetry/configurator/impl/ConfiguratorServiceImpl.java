@@ -38,6 +38,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String DES_FILE = " destination profile not provided by input!";
     private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
     private static final String NO_DES_GROUP = "No destination group configured!";
+    private static final String DES_GROUP_ID_NULL = "There is no destination group id provided by input!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -159,7 +160,22 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<DeleteTelemetryDestinationOutput>> deleteTelemetryDestination(DeleteTelemetryDestinationInput input) {
-        return null;
+        DeleteTelemetryDestinationOutputBuilder builder = new DeleteTelemetryDestinationOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+        if (null == input.getTelemetryDestinationGroup() || input.getTelemetryDestinationGroup().isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, DES_GROUP_ID_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (int i = 0; i < input.getTelemetryDestinationGroup().size(); i++) {
+            dataProcessor.deleteDestinationGroupFromDataStore(input.getTelemetryDestinationGroup().get(i).getDestinationGroupId());
+        }
+
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override

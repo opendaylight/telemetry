@@ -149,4 +149,8 @@ public class DataProcessor {
         operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSensorGroupPath(sensorGroupId));
     }
 
+    public void deleteDestinationGroupFromDataStore(String destinationGroupId) {
+        operateDataStore(ConfigurationType.DELETE, null, IidConstants.getDestinationGroupPath(destinationGroupId));
+    }
+
 }
