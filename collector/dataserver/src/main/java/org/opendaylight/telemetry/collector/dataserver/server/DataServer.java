@@ -7,32 +7,25 @@
  */
 package org.opendaylight.telemetry.collector.dataserver.server;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.MoreExecutors;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotification;
 import org.opendaylight.telemetry.collector.dataserver.utils.RPCFutures;
 import org.opendaylight.telemetry.proto.*;
-import org.opendaylight.yang.gen.v1.opendaylight.tsdr.rev150219.DataCategory;
-import org.opendaylight.yang.gen.v1.opendaylight.tsdr.rev150219.tsdrrecord.RecordKeys;
-import org.opendaylight.yang.gen.v1.opendaylight.tsdr.rev150219.tsdrrecord.RecordKeysBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreInput;
+import org.opendaylight.telemetry.proto.KeyValue;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.data.store.input.MetricRecord;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.data.store.input.MetricRecordBuilder;
+
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.MetricInfo;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.MetricInfoBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -44,12 +37,12 @@ import java.util.concurrent.Future;
  */
 public class DataServer {
     private static final Logger LOG = LoggerFactory.getLogger(DataServer.class);
-    private final TelemetryDatastorageService dataStorageService;
+    private final TelemetryDatastorageService telemetryDatastorageService;
     private int port = 50051;
     private Server server;
 
-    public DataServer(final TelemetryDatastorageService dataStorageService) {
-        this.dataStorageService = dataStorageService;
+    public DataServer(final TelemetryDatastorageService telemetryDatastorageService) {
+        this.telemetryDatastorageService = telemetryDatastorageService;
         this.server = ServerBuilder.forPort(port).addService(new TelemetryService()).build();
     }
 
@@ -81,35 +74,37 @@ public class DataServer {
             return hostname;
         }
 
-        /**
-         * Write data to TSDR
-         */
         private void dataStorage(TelemetryStreamRequest telemetryStreamRequest) {
             DataStoreInputBuilder inputBuilder = new DataStoreInputBuilder();
             String systemId = telemetryStreamRequest.getSystemId();
-            List<MetricRecord> metricRecordList = new ArrayList<>();
+            int version = telemetryStreamRequest.getVersion();
+            List<MetricInfo> metricInfoList = new ArrayList<>();
 
             for(Notification notification : telemetryStreamRequest.getNotificationList()) {
-                long timestamp = notification.getTimestamp();
+                MetricInfoBuilder metricInfoBuilder = new MetricInfoBuilder();
+                List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model
+                        .metric.info.KeyValue> keyValueList = new ArrayList<>();
                 for(KeyValue keyValue : notification.getKvList()) {
-                    MetricRecordBuilder metricRecordBuilder = new MetricRecordBuilder();
-                    List<RecordKeys> recordKeysList = new ArrayList<>();
-                    RecordKeysBuilder recordKeysBuilder = new RecordKeysBuilder();
-                    recordKeysBuilder.setKeyName("OCPath");
-                    recordKeysBuilder.setKeyValue(systemId + ":" + notification.getKeyPrefix() + "/" + keyValue.getKey());
-                    recordKeysList.add(recordKeysBuilder.build());
-
-                    metricRecordBuilder.setRecordKeys(recordKeysList);
-                    metricRecordBuilder.setTSDRDataCategory(DataCategory.EXTERNAL);
-                    metricRecordBuilder.setMetricName(keyValue.getKey());
-                    metricRecordBuilder.setMetricValue(BigDecimal.valueOf(keyValue.getValue().getUint64Val()));
-                    metricRecordBuilder.setTimeStamp(timestamp);
-                    metricRecordBuilder.setNodeID(systemId);
-                    metricRecordList.add(metricRecordBuilder.build());
+                    org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model
+                            .metric.info.KeyValueBuilder keyValueBuilder =
+                            new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry
+                                    .datastorage.rev180326.telemetry.data.model.metric.info.KeyValueBuilder();
+                    keyValueBuilder.setKey(keyValue.getKey());
+                    keyValueBuilder.setValue(BigInteger.valueOf(keyValue.getValue().getUint64Val()));
+                    keyValueList.add(keyValueBuilder.build());
                 }
+                metricInfoBuilder.setKeyPrefix(notification.getKeyPrefix());
+                metricInfoBuilder.setSampleInterval(BigInteger.valueOf(notification.getSampleInterval()));
+                metricInfoBuilder.setTimestamp(BigInteger.valueOf(notification.getSampleInterval()));
+                metricInfoBuilder.setKeyValue(keyValueList);
+                metricInfoList.add(metricInfoBuilder.build());
             }
-            inputBuilder.setMetricRecord(metricRecordList);
-            Future<RpcResult<Void>> future = dataStorageService.dataStore(inputBuilder.build());
+
+            inputBuilder.setSystemId(systemId);
+            inputBuilder.setVersion((long)version);
+            inputBuilder.setMetricInfo(metricInfoList);
+
+            Future<RpcResult<Void>> future = telemetryDatastorageService.dataStore(inputBuilder.build());
             RPCFutures.logResult(future, "data-storage", LOG);
         }
 
