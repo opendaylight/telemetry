@@ -26,17 +26,35 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <name>ODL :: telemetry :: ${project.artifactId}</name>
   <packaging>bundle</packaging>
 
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>1.7.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
-      <groupId>org.opendaylight.tsdr</groupId>
-      <artifactId>tsdr-collector-spi</artifactId>
-      <version>1.5.0-SNAPSHOT</version>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-binding-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.tsdr</groupId>
       <artifactId>tsdr-persistence-spi</artifactId>
       <version>1.5.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.tsdr</groupId>
+      <artifactId>tsdr-collector-spi</artifactId>
+      <version>1.5.0-SNAPSHOT</version>
+    </dependency>
+
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>

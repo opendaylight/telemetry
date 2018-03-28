@@ -25,7 +25,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <name>ODL :: telemetry :: ${project.artifactId} [Karaf Feature]</name>
          
     <properties>
-      <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
+        <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
+        <tsdr.version>1.5.0-SNAPSHOT</tsdr.version>
+        <netconf.version>1.4.0-SNAPSHOT</netconf.version>
+        <apidocs.version>1.7.0-SNAPSHOT</apidocs.version>
+        <restconf.version>1.7.0-SNAPSHOT</restconf.version>
+        <dluxapps.version>0.7.0-SNAPSHOT</dluxapps.version>
     </properties>
 
     <dependencies>
@@ -37,9 +42,39 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>collector-dataserver</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.opendaylight.netconf</groupId>
+            <artifactId>odl-netconf-console</artifactId>
+            <version>${netconf.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.netconf</groupId>
+            <artifactId>odl-restconf</artifactId>
+            <version>${restconf.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.netconf</groupId>
+            <artifactId>odl-mdsal-apidocs</artifactId>
+            <version>${apidocs.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.dluxapps</groupId>
+            <artifactId>odl-dluxapps-yangman</artifactId>
+            <version>${dluxapps.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.tsdr</groupId>
+            <artifactId>odl-tsdr-hsqldb-all</artifactId>
+            <version>${tsdr.version}</version>
+            <type>xml</type>
+            <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -48,9 +83,16 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>collector-dataserver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>console</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
     </dependencies>
 
 </project>

@@ -9,16 +9,43 @@ module telemetry-datastorage {
         description "Initial revision.";
     }
 
-    import tsdr-metric-data { 
-        prefix tsdr-metric-data; 
-        revision-date "2016-03-25";
+    grouping telemetry-data-model {
+        leaf version {
+            type uint32;
+        }
+
+        leaf system-id {
+            type string;
+        }
+
+        list metric-info {
+            leaf timestamp {
+                type uint64;
+            }
+
+            leaf key-prefix {
+                type string;
+            }
+
+            leaf sample-interval {
+                type uint64;
+            }
+
+            list key-value {
+                leaf key {
+                    type string;
+                }
+
+                leaf value {
+                    type uint64;
+                }
+            }
+        }
     }
-    
+
     rpc data-store {
         input {
-            list MetricRecord {
-                uses tsdr-metric-data:TSDRMetric;
-            }
+            uses telemetry-data-model;
         }
     }
 }

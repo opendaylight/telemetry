@@ -117,11 +117,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <version>3.3.7</version>
     </dependency>
     <dependency>
-        <groupId>org.opendaylight.telemetry</groupId>
-        <artifactId>collector-datastorage</artifactId>
-        <version>${project.version}</version>
+      <groupId>org.opendaylight.telemetry</groupId>
+      <artifactId>collector-datastorage</artifactId>
+      <version>${project.version}</version>
     </dependency>
-            
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -230,13 +229,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                       !sun.security.x509,
                       !com.google.protobuf,
                       !com.google.protobuf.util,
+                      !com.sun.jna,
+                      !com.sun.jna.ptr,
+                      !com.sun.jna.win32,
+                      !org.mozilla.universalchardet,
                       *
                   </Import-Package>
                   <Export-Package>
                       org.opendaylight.telemetry.collector.dataserver,
                   </Export-Package>
                   <Embed-Dependency>
-                      *;scope=compile|runtime;artifactId=!telemetry*|yang*|sal*|config*|guava;inline=true
+                      *;scope=compile|runtime;artifactId=!telemetry*|yang*|sal*|config*|guava|tsdr*|collector*;inline=true
                   </Embed-Dependency>
                   <Embed-Transitive>true</Embed-Transitive>
               </instructions>
