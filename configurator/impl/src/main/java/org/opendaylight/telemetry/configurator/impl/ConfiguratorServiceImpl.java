@@ -16,6 +16,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.*;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult.Result;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.node.subscription.TelemetryNode;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.TelemetrySubscription;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetryDestination;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetrySensor;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -39,6 +43,14 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
     private static final String NO_DES_GROUP = "No destination group configured!";
     private static final String DES_GROUP_ID_NULL = "There is no destination group id provided by input!";
+
+    private static final String NODE_NULL = "There is no node id provided by input!";
+    private static final String SUBSCR_NULL = " no subscription provided by input!";
+    private static final String SUBSCR_PARAS_NULL = " exist Param is null! ";
+    private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in" +
+            " sensor is null or exist sensor not configured!";
+    private static final String SUBSCR_DES_ABNORMAL = "Destination empty in node subscription" +
+            " or exist destination not configured!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -180,7 +192,45 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> configureNodeTelemetrySubscription(ConfigureNodeTelemetrySubscriptionInput input) {
-        return null;
+        ConfigureNodeTelemetrySubscriptionOutputBuilder builder = new ConfigureNodeTelemetrySubscriptionOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        List<TelemetryNode> nodeGroupList = input.getTelemetryNode();
+        if (null == nodeGroupList || nodeGroupList.isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, NODE_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (TelemetryNode telemetryNodeGroup : nodeGroupList) {
+            if (null == telemetryNodeGroup.getTelemetrySubscription() || telemetryNodeGroup.getTelemetrySubscription().isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, telemetryNodeGroup.getNodeId() + SUBSCR_NULL));
+                return RpcResultBuilder.success(builder.build()).buildFuture();
+            }
+
+            for (TelemetrySubscription subscription : telemetryNodeGroup.getTelemetrySubscription()) {
+                if (!checkParamsInSubscriptionExist(subscription)) {
+                    builder.setConfigureResult(getConfigResult(false, subscription.getSubscriptionName() + SUBSCR_PARAS_NULL + telemetryNodeGroup.getNodeId()));
+                    return RpcResultBuilder.success(builder.build()).buildFuture();
+                }
+            }
+        }
+
+        if (!checkSubscriSensorProvidedByConfigSubscriInput(nodeGroupList)) {
+            builder.setConfigureResult(getConfigResult(false, SUBSCR_SENSOR_ABNORMAL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (!checkSubscriDesProvidedByConfigSubscriInput(nodeGroupList)) {
+            builder.setConfigureResult(getConfigResult(false, SUBSCR_DES_ABNORMAL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        dataProcessor.addNodeSubscriptionToDataStore(input.getTelemetryNode());
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
@@ -239,6 +289,40 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         return false;
     }
 
+    private boolean checkSubscriSensorProvidedByConfigSubscriInput(List<TelemetryNode> nodeGroupList) {
+        for (TelemetryNode telemetryNodeGroup : nodeGroupList) {
+            for (TelemetrySubscription subscription : telemetryNodeGroup.getTelemetrySubscription()) {
+                if (null == subscription.getTelemetrySensor() || subscription.getTelemetrySensor().isEmpty()) {
+                    return false;
+                }
+
+                for (TelemetrySensor sensor : subscription.getTelemetrySensor()) {
+                    if (!(checkSensorExit(sensor.getSensorGroupId()) && checkParamsInSensorExist(sensor))) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean checkSubscriDesProvidedByConfigSubscriInput(List<TelemetryNode> nodeGroupList) {
+        for (TelemetryNode telemetryNodeGroup : nodeGroupList) {
+            for (TelemetrySubscription subscription : telemetryNodeGroup.getTelemetrySubscription()) {
+                if (null == subscription.getTelemetryDestination() || subscription.getTelemetryDestination().isEmpty()) {
+                    return false;
+                }
+
+                for (TelemetryDestination destination : subscription.getTelemetryDestination()) {
+                    if (!checkDestinationExit(destination.getDestinationGroupId())) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     private ConfigureResult getConfigResult(boolean result, String errorCause) {
         ConfigureResultBuilder cfgResultBuilder  = new ConfigureResultBuilder();
         if (result) {
@@ -252,6 +336,46 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     private <T> Future<RpcResult<T>> rpcErr(String errMsg) {
         return RpcResultBuilder.<T>failed().withError(RpcError.ErrorType.APPLICATION, errMsg).buildFuture();
+    }
+
+    private boolean checkParamsInSubscriptionExist(TelemetrySubscription subscription) {
+        if (null == subscription.getLocalSourceAddress()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkSensorExit(String sensorId) {
+        List<TelemetrySensorGroup> sensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        if (null ==  sensorGroupList || sensorGroupList.isEmpty()) {
+            return false;
+        }
+        for (TelemetrySensorGroup sensorGroup : sensorGroupList) {
+            if (sensorGroup.getTelemetrySensorGroupId().equals(sensorId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkParamsInSensorExist(TelemetrySensor sensor) {
+        if (null == sensor.getSampleInterval()) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkDestinationExit(String destinationId) {
+        List<TelemetryDestinationGroup> destinationGroupList = dataProcessor.getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        if (null == destinationGroupList || destinationGroupList.isEmpty()) {
+            return false;
+        }
+        for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
+            if (destinationGroup.getDestinationGroupId().equals(destinationId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

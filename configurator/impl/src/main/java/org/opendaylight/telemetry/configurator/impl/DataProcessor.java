@@ -125,6 +125,12 @@ public class DataProcessor {
         }
     }
 
+    public void addNodeSubscriptionToDataStore(List<TelemetryNode> nodeGroupList) {
+        for (TelemetryNode nodeGroup : nodeGroupList) {
+            operateDataStore(ConfigurationType.MODIFY, nodeGroup, IidConstants.getNodeGroupPath(nodeGroup.getNodeId()));
+        }
+    }
+
     private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> operateDataStore(
             ConfigurationType type, T data, InstanceIdentifier<T> path) {
         final WriteTransaction writeTransaction = dataBroker.newWriteOnlyTransaction();
