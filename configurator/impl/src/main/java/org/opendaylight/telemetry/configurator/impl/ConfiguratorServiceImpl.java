@@ -37,6 +37,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String DES_GROUP_NULL = "There is no destination group provided by input!";
     private static final String DES_FILE = " destination profile not provided by input!";
     private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
+    private static final String NO_DES_GROUP = "No destination group configured!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor) {
         this.dataProcessor = dataProcessor;
@@ -143,7 +144,17 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<QueryTelemetryDestinationOutput>> queryTelemetryDestination(QueryTelemetryDestinationInput input) {
-        return null;
+        if (null == input) {
+            return rpcErr(INPUT_NULL);
+        }
+
+        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor.getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        if (null == allDestinationGroupList || allDestinationGroupList.isEmpty()) {
+            return rpcErr(NO_DES_GROUP);
+        }
+        QueryTelemetryDestinationOutputBuilder builder = new QueryTelemetryDestinationOutputBuilder();
+        builder.setTelemetryDestinationGroup(allDestinationGroupList);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
