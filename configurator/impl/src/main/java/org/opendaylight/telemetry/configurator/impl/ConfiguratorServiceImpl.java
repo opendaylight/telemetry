@@ -47,6 +47,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     private static final String NODE_NULL = "There is no node id provided by input!";
     private static final String SUBSCR_NULL = " no subscription provided by input!";
+    private static final String NODE_SUBSCR_NULL = "Exist node not provide subscription!";
+    private static final String NODE_SUBSCR_SENSOR_NULL = "There is no sensor provided in node subscription!";
     private static final String SUBSCR_PARAS_NULL = " exist Param is null! ";
     private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in" +
             " sensor is null or exist sensor not configured!";
@@ -286,7 +288,37 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>> deleteNodeTelemetrySubscriptionSensor(DeleteNodeTelemetrySubscriptionSensorInput input) {
-        return null;
+        DeleteNodeTelemetrySubscriptionSensorOutputBuilder builder = new DeleteNodeTelemetrySubscriptionSensorOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (null == input.getTelemetryNode() || input.getTelemetryNode().isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, NODE_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (!checkSubscriProvidedByDelSensorInput(input)) {
+            builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (!checkSubscriSensorProvidedByDelSensorInput(input)) {
+            builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_SENSOR_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
+                dataProcessor.deleteNodeSubscriptionSensorFromDataStore(input.getTelemetryNode().get(i).getNodeId(),
+                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
+                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                                .getTelemetryNodeSubscriptionSensor());
+            }
+        }
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override
@@ -417,6 +449,30 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
             }
         }
         return false;
+    }
+
+    private boolean checkSubscriProvidedByDelSensorInput(DeleteNodeTelemetrySubscriptionSensorInput input) {
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription()
+                    || input.getTelemetryNode().get(i).getTelemetryNodeSubscription().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkSubscriSensorProvidedByDelSensorInput(DeleteNodeTelemetrySubscriptionSensorInput input) {
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
+                if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                        .getTelemetryNodeSubscriptionSensor() || input.getTelemetryNode().get(i)
+                        .getTelemetryNodeSubscription().get(j).getTelemetryNodeSubscriptionSensor()
+                        .isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
 }

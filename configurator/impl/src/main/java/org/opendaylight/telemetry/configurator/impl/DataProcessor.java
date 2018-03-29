@@ -182,4 +182,12 @@ public class DataProcessor {
         }
     }
 
+    public void deleteNodeSubscriptionSensorFromDataStore(String nodeId, String name,
+                                                          List<TelemetryNodeSubscriptionSensor> list) {
+        for (int i = 0; i < list.size(); i++) {
+            operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSubscriptionSensorPath(
+                    nodeId, name, list.get(i).getSensorGroupId()));
+        }
+    }
+
 }
