@@ -43,6 +43,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
     private static final String NO_DES_GROUP = "No destination group configured!";
     private static final String DES_GROUP_ID_NULL = "There is no destination group id provided by input!";
+    private static final String NO_SUBSCR = "No node subscription configured!";
 
     private static final String NODE_NULL = "There is no node id provided by input!";
     private static final String SUBSCR_NULL = " no subscription provided by input!";
@@ -235,7 +236,17 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelemetrySubscription(QueryNodeTelemetrySubscriptionInput input) {
-        return null;
+        if (null == input) {
+            return rpcErr(INPUT_NULL);
+        }
+
+        List<TelemetryNode> allNodeSubscriptionList = dataProcessor.getNodeSubscriptionFromDataStore(IidConstants.TELEMETRY_IID);
+        if (null == allNodeSubscriptionList || allNodeSubscriptionList.isEmpty()) {
+            return rpcErr(NO_SUBSCR);
+        }
+        QueryNodeTelemetrySubscriptionOutputBuilder builder = new QueryNodeTelemetrySubscriptionOutputBuilder();
+        builder.setTelemetryNode(allNodeSubscriptionList);
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override

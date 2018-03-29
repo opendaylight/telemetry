@@ -113,6 +113,22 @@ public class DataProcessor {
         return null;
     }
 
+    public List<TelemetryNode> getNodeSubscriptionFromDataStore(InstanceIdentifier<Telemetry> path) {
+        final ReadTransaction readTransaction = dataBroker.newReadOnlyTransaction();
+        Optional<Telemetry> telemetry = null;
+        try {
+            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
+            if (telemetry.isPresent()) {
+                LOG.info("Telemetry data from controller data store is not null");
+                return telemetry.get().getTelemetryNode();
+            }
+        } catch (ReadFailedException e) {
+            LOG.warn("Failed to read {} ", path, e);
+        }
+        LOG.info("Telemetry data from controller data store is null");
+        return null;
+    }
+
     public void addSensorGroupToDataStore(List<TelemetrySensorGroup> sensorGroupList) {
         for (TelemetrySensorGroup sensorGroup : sensorGroupList) {
             operateDataStore(ConfigurationType.ADD, sensorGroup, IidConstants.getSensorGroupPath(sensorGroup.getTelemetrySensorGroupId()));
