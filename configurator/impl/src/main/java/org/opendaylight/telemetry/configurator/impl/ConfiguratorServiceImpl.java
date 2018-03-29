@@ -251,7 +251,37 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<DeleteNodeTelemetrySubscriptionOutput>> deleteNodeTelemetrySubscription(DeleteNodeTelemetrySubscriptionInput input) {
-        return null;
+        DeleteNodeTelemetrySubscriptionOutputBuilder builder = new DeleteNodeTelemetrySubscriptionOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (null == input.getTelemetryNode() || input.getTelemetryNode().isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, NODE_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription()
+                    || input.getTelemetryNode().get(i).getTelemetryNodeSubscription().isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, input.getTelemetryNode().get(i).getNodeId() + SUBSCR_NULL));
+                return RpcResultBuilder.success(builder.build()).buildFuture();
+            }
+        }
+
+        List<TelemetryNode> allNodeSubscriptionList = dataProcessor.getNodeSubscriptionFromDataStore(IidConstants.TELEMETRY_IID);
+        if (null == allNodeSubscriptionList || allNodeSubscriptionList.isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, NO_SUBSCR));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            dataProcessor.deleteNodeSubscriptionFromDataStore(input.getTelemetryNode().get(i).getNodeId(),
+                    input.getTelemetryNode().get(i).getTelemetryNodeSubscription());
+        }
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     @Override

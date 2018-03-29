@@ -175,4 +175,11 @@ public class DataProcessor {
         operateDataStore(ConfigurationType.DELETE, null, IidConstants.getDestinationGroupPath(destinationGroupId));
     }
 
+    public void deleteNodeSubscriptionFromDataStore(String nodeId, List<TelemetryNodeSubscription> list) {
+        for (int i = 0; i < list.size(); i++) {
+            operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSubscriptionPath(nodeId,
+                    list.get(i).getSubscriptionName()));
+        }
+    }
+
 }
