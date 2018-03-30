@@ -15,6 +15,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     interface="org.opendaylight.controller.md.sal.binding.api.DataBroker"
     odl:type="default" />
   
+  <reference id="mountService"
+    interface="org.opendaylight.controller.md.sal.binding.api.MountPointService"/>
+
+  <bean id="configurationWriter"
+        class="org.opendaylight.telemetry.configurator.impl.ConfigurationWriter">
+    <argument ref="mountService" />
+  </bean>
+  
   <bean id="dataProcessor"
         class="org.opendaylight.telemetry.configurator.impl.DataProcessor">
     <argument ref="dataBroker" />
