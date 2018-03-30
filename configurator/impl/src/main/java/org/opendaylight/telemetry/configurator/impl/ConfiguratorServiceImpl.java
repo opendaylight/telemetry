@@ -49,6 +49,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String SUBSCR_NULL = " no subscription provided by input!";
     private static final String NODE_SUBSCR_NULL = "Exist node not provide subscription!";
     private static final String NODE_SUBSCR_SENSOR_NULL = "There is no sensor provided in node subscription!";
+    private static final String NODE_SUBSCR_DES_NULL = "There is no destination provided in node subscription!";
     private static final String SUBSCR_PARAS_NULL = " exist Param is null! ";
     private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in" +
             " sensor is null or exist sensor not configured!";
@@ -323,7 +324,38 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     @Override
     public Future<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>> deleteNodeTelemetrySubscriptionDestination(DeleteNodeTelemetrySubscriptionDestinationInput input) {
-        return null;
+        DeleteNodeTelemetrySubscriptionDestinationOutputBuilder builder = new DeleteNodeTelemetrySubscriptionDestinationOutputBuilder();
+        if (null == input) {
+            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (null == input.getTelemetryNode() || input.getTelemetryNode().isEmpty()) {
+            builder.setConfigureResult(getConfigResult(false, NODE_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (!checkSubscriProvidedByDelDesInput(input)) {
+            builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        if (!checkSubscriDesProvidedByDelDesInput(input)) {
+            builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_DES_NULL));
+            return RpcResultBuilder.success(builder.build()).buildFuture();
+        }
+
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
+                dataProcessor.deleteNodeSubscriptionDestinationFromDataStore(input.getTelemetryNode().get(i).getNodeId(),
+                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
+                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                                .getTelemetryNodeSubscriptionDestination());
+            }
+        }
+
+        builder.setConfigureResult(getConfigResult(true, ""));
+        return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
     private boolean checkSensorGroupExistedInDataStore(List<TelemetrySensorGroup> sensorGroupList) {
@@ -467,6 +499,30 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
                 if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
                         .getTelemetryNodeSubscriptionSensor() || input.getTelemetryNode().get(i)
                         .getTelemetryNodeSubscription().get(j).getTelemetryNodeSubscriptionSensor()
+                        .isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean checkSubscriProvidedByDelDesInput(DeleteNodeTelemetrySubscriptionDestinationInput input) {
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription()
+                    || input.getTelemetryNode().get(i).getTelemetryNodeSubscription().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkSubscriDesProvidedByDelDesInput(DeleteNodeTelemetrySubscriptionDestinationInput input) {
+        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+            for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
+                if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                        .getTelemetryNodeSubscriptionDestination() || input.getTelemetryNode().get(i)
+                        .getTelemetryNodeSubscription().get(j).getTelemetryNodeSubscriptionDestination()
                         .isEmpty()) {
                     return false;
                 }
