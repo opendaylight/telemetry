@@ -66,12 +66,14 @@ public class ConfigurationWriter {
     }
 
     public CheckedFuture<Void, TransactionCommitFailedException> writeTelemetryConfig(
-            ConfigurationType type, String nodeId, TelemetrySystem data) {
+            ConfigurationType type, String nodeId, String subscriptionName, TelemetrySystem data) {
         if (type == ConfigurationType.DELETE) {
-            return write(OperateType.DELETE, nodeId, null, data);
+        	  LOG.info("access delete write");
+            return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
+                    .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName)), null);
         }
-
-        return write(OperateType.REPLACE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID, data);
+        LOG.info("access merge write");
+        return write(OperateType.MERGE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID, data);
     }
 
     public CheckedFuture<Void, TransactionCommitFailedException> delSubscription(String nodeId, String subscriptionName) {
@@ -95,18 +97,23 @@ public class ConfigurationWriter {
 
     private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> write(
             OperateType type, String nodeId, InstanceIdentifier<T> path, T data) {
+        LOG.info("already entered write");
         final DataBroker dataBroker = getDataBroker(nodeId, mountPointService);
         if (null == dataBroker) {
+            LOG.info("write process data broker is null");
             return null;
         }
+        LOG.info("write process data broker is not null");
         return operate(type, dataBroker, RETRY_WRITE_MAX, path, data);
     }
 
     private DataBroker getDataBroker(String nodeId, MountPointService mountPointService) {
         MountPoint mountPoint = getMountPoint(nodeId, mountPointService);
         if (null == mountPoint) {
+            LOG.info("mount point is null");
             return null;
         }
+        LOG.info("mount point is not null");
         Optional<DataBroker> nodeBroker = mountPoint.getService(DataBroker.class);
         if (!nodeBroker.isPresent()) {
             return null;
@@ -116,8 +123,10 @@ public class ConfigurationWriter {
 
     private MountPoint getMountPoint(String nodeId, MountPointService mountPointService) {
         if (null == mountPointService) {
+            LOG.info("mount point service is null");
             return null;
         }
+        LOG.info("mount point service is not null");
         Optional<MountPoint> nodeMountPoint = mountPointService.getMountPoint(IidConstants.NETCONF_TOPO_IID
                 .child(Node.class, new NodeKey(new NodeId(nodeId))));
 

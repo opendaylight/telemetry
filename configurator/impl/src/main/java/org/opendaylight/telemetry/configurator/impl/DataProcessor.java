@@ -198,27 +198,8 @@ public class DataProcessor {
         }
     }
 
-    public List<TelemetrySensorGroup> getSensorGroupDetailById(List<TelemetrySubscription> list) {
-        List<TelemetrySensor> sensorList = new ArrayList<>();
-
-        for (TelemetrySubscription subscription : list) {
-            for (TelemetrySensor sensor : subscription.getTelemetrySensor()) {
-                if (!checkSensorExist(sensor, sensorList)) {
-                    sensorList.add(sensor);
-                }
-            }
-        }
-
-        return sensorDetail(sensorList, getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID));
-    }
-
-    private boolean checkSensorExist(TelemetrySensor sensor, List<TelemetrySensor> sensorList) {
-        for (int i = 0; i < sensorList.size(); i++) {
-            if (sensorList.get(i).getSensorGroupId().equals(sensor.getSensorGroupId())) {
-                return true;
-            }
-        }
-        return false;
+    public List<TelemetrySensorGroup> getSensorGroupDetailById(TelemetrySubscription subscription) {
+        return sensorDetail(subscription.getTelemetrySensor(), getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID));
     }
 
     private List<TelemetrySensorGroup> sensorDetail(List<TelemetrySensor> sensorList, List<TelemetrySensorGroup> sensorGroupList) {
@@ -233,27 +214,8 @@ public class DataProcessor {
         return list;
     }
 
-    public List<TelemetryDestinationGroup> getDestinationGroupDetailById(List<TelemetrySubscription> list) {
-        List<TelemetryDestination> destinationList = new ArrayList<>();
-
-        for (TelemetrySubscription subscription : list) {
-            for (TelemetryDestination destination : subscription.getTelemetryDestination()) {
-                if (!checkDestinationExist(destination, destinationList)) {
-                    destinationList.add(destination);
-                }
-            }
-        }
-
-        return destinationDetail(destinationList, getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID));
-    }
-
-    private boolean checkDestinationExist(TelemetryDestination destination, List<TelemetryDestination> destinationList) {
-        for (int i = 0; i < destinationList.size(); i++) {
-            if (destinationList.get(i).getDestinationGroupId().equals(destination.getDestinationGroupId())) {
-                return true;
-            }
-        }
-        return false;
+    public List<TelemetryDestinationGroup> getDestinationGroupDetailById(TelemetrySubscription subscription) {
+        return destinationDetail(subscription.getTelemetryDestination(), getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID));
     }
 
     private List<TelemetryDestinationGroup> destinationDetail(List<TelemetryDestination> destinationList,
@@ -272,11 +234,11 @@ public class DataProcessor {
 
     public TelemetrySystem convertDataToSouth(List<TelemetrySensorGroup> sensorGroupList,
                                               List<TelemetryDestinationGroup> destinationGroupList,
-                                              List<TelemetrySubscription> subscriptionList) {
+                                              TelemetrySubscription subscription) {
         TelemetrySystemBuilder systemBuilder = new TelemetrySystemBuilder();
         systemBuilder.setSensorGroups(convertSensor(sensorGroupList));
         systemBuilder.setDestinationGroups(convertDestination(destinationGroupList));
-        systemBuilder.setSubscriptions(convertSubscription(subscriptionList));
+        systemBuilder.setSubscriptions(convertSubscription(subscription));
         return systemBuilder.build();
     }
 
@@ -339,20 +301,18 @@ public class DataProcessor {
         return builder.build();
     }
 
-    private Subscriptions convertSubscription(List<TelemetrySubscription> list) {
+    private Subscriptions convertSubscription(TelemetrySubscription subscription) {
 
         List<Subscription> subscriptionList = new ArrayList<>();
-        for (TelemetrySubscription telemetrySubscription : list) {
-            SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder();
-            subscriptionBuilder.setKey(new SubscriptionKey(telemetrySubscription.getSubscriptionName()));
-            subscriptionBuilder.setSubscriptionName(telemetrySubscription.getSubscriptionName());
-            subscriptionBuilder.setConfig(convertLeafParamsOfSubscription(telemetrySubscription.getSubscriptionName(),
-                    telemetrySubscription.getLocalSourceAddress(), telemetrySubscription.getOriginatedQosMarking(),
-                    telemetrySubscription.getProtocolType(), telemetrySubscription.getEncodingType()));
-            subscriptionBuilder.setSensorProfiles(convertSensorProfiles(telemetrySubscription.getTelemetrySensor()));
-            subscriptionBuilder.setDestinationGroups(convertDestinationGroups(telemetrySubscription.getTelemetryDestination()));
-            subscriptionList.add(subscriptionBuilder.build());
-        }
+        SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder();
+        subscriptionBuilder.setKey(new SubscriptionKey(subscription.getSubscriptionName()));
+        subscriptionBuilder.setSubscriptionName(subscription.getSubscriptionName());
+        subscriptionBuilder.setConfig(convertLeafParamsOfSubscription(subscription.getSubscriptionName(),
+                subscription.getLocalSourceAddress(), subscription.getOriginatedQosMarking(),
+                subscription.getProtocolType(), subscription.getEncodingType()));
+        subscriptionBuilder.setSensorProfiles(convertSensorProfiles(subscription.getTelemetrySensor()));
+        subscriptionBuilder.setDestinationGroups(convertDestinationGroups(subscription.getTelemetryDestination()));
+        subscriptionList.add(subscriptionBuilder.build());
         PersistentBuilder persistentBuilder = new PersistentBuilder();
         persistentBuilder.setSubscription(subscriptionList);
         SubscriptionsBuilder subscriptionsBuilder = new SubscriptionsBuilder();
