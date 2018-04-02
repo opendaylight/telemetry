@@ -177,8 +177,8 @@ public class DataProcessor {
 
     public void deleteNodeSubscriptionFromDataStore(String nodeId, List<TelemetryNodeSubscription> list) {
         for (int i = 0; i < list.size(); i++) {
-            operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSubscriptionPath(nodeId,
-                    list.get(i).getSubscriptionName()));
+                operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSubscriptionPath(nodeId,
+                        list.get(i).getSubscriptionName()));
         }
     }
 
@@ -198,4 +198,278 @@ public class DataProcessor {
         }
     }
 
+    public List<TelemetrySensorGroup> getSensorGroupDetailById(List<TelemetrySubscription> list) {
+        List<TelemetrySensor> sensorList = new ArrayList<>();
+
+        for (TelemetrySubscription subscription : list) {
+            for (TelemetrySensor sensor : subscription.getTelemetrySensor()) {
+                if (!checkSensorExist(sensor, sensorList)) {
+                    sensorList.add(sensor);
+                }
+            }
+        }
+
+        return sensorDetail(sensorList, getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID));
+    }
+
+    private boolean checkSensorExist(TelemetrySensor sensor, List<TelemetrySensor> sensorList) {
+        for (int i = 0; i < sensorList.size(); i++) {
+            if (sensorList.get(i).getSensorGroupId().equals(sensor.getSensorGroupId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<TelemetrySensorGroup> sensorDetail(List<TelemetrySensor> sensorList, List<TelemetrySensorGroup> sensorGroupList) {
+        List<TelemetrySensorGroup> list = new ArrayList<>();
+        for (int i = 0; i < sensorList.size(); i++) {
+            for (int j = 0; j < sensorGroupList.size(); j++) {
+                if (sensorList.get(i).getSensorGroupId().equals(sensorGroupList.get(j).getTelemetrySensorGroupId())) {
+                    list.add(sensorGroupList.get(j));
+                }
+            }
+        }
+        return list;
+    }
+
+    public List<TelemetryDestinationGroup> getDestinationGroupDetailById(List<TelemetrySubscription> list) {
+        List<TelemetryDestination> destinationList = new ArrayList<>();
+
+        for (TelemetrySubscription subscription : list) {
+            for (TelemetryDestination destination : subscription.getTelemetryDestination()) {
+                if (!checkDestinationExist(destination, destinationList)) {
+                    destinationList.add(destination);
+                }
+            }
+        }
+
+        return destinationDetail(destinationList, getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID));
+    }
+
+    private boolean checkDestinationExist(TelemetryDestination destination, List<TelemetryDestination> destinationList) {
+        for (int i = 0; i < destinationList.size(); i++) {
+            if (destinationList.get(i).getDestinationGroupId().equals(destination.getDestinationGroupId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<TelemetryDestinationGroup> destinationDetail(List<TelemetryDestination> destinationList,
+                                                              List<TelemetryDestinationGroup> destinationGroupList) {
+        List<TelemetryDestinationGroup> list = new ArrayList();
+        for (int i = 0; i < destinationList.size(); i++) {
+            for (int j = 0; j < destinationGroupList.size(); j++) {
+                if (destinationList.get(i).getDestinationGroupId().equals(destinationGroupList.get(j)
+                        .getDestinationGroupId())) {
+                    list.add(destinationGroupList.get(j));
+                }
+            }
+        }
+        return list;
+    }
+
+    public TelemetrySystem convertDataToSouth(List<TelemetrySensorGroup> sensorGroupList,
+                                              List<TelemetryDestinationGroup> destinationGroupList,
+                                              List<TelemetrySubscription> subscriptionList) {
+        TelemetrySystemBuilder systemBuilder = new TelemetrySystemBuilder();
+        systemBuilder.setSensorGroups(convertSensor(sensorGroupList));
+        systemBuilder.setDestinationGroups(convertDestination(destinationGroupList));
+        systemBuilder.setSubscriptions(convertSubscription(subscriptionList));
+        return systemBuilder.build();
+    }
+
+    private SensorGroups convertSensor(List<TelemetrySensorGroup> list) {
+        List<SensorGroup> sensorGroupList = new ArrayList<>();
+        for (TelemetrySensorGroup telemetrySensorGroup : list) {
+            SensorGroupBuilder builder = new SensorGroupBuilder();
+            builder.setKey(new SensorGroupKey(telemetrySensorGroup.getTelemetrySensorGroupId()));
+            builder.setSensorGroupId(telemetrySensorGroup.getTelemetrySensorGroupId());
+            //builder.setConfig(new ConfigBuilder().setSensorGroupId(telemetrySensorGroup.getTelemetrySensorGroupId()));
+            builder.setSensorPaths(convertSensorPaths(telemetrySensorGroup.getTelemetrySensorPaths()));
+            sensorGroupList.add(builder.build());
+        }
+        SensorGroupsBuilder sensorGroupsBuilder = new SensorGroupsBuilder();
+        sensorGroupsBuilder.setSensorGroup(sensorGroupList);
+        return sensorGroupsBuilder.build();
+    }
+
+    private SensorPaths convertSensorPaths(List<TelemetrySensorPaths> list) {
+        List<SensorPath> sensorPathList = new ArrayList<>();
+        for (TelemetrySensorPaths paths : list) {
+            SensorPathBuilder sensorPathBuilder = new SensorPathBuilder();
+            sensorPathBuilder.setKey(new SensorPathKey(paths.getTelemetrySensorPath()));
+            sensorPathBuilder.setPath(paths.getTelemetrySensorPath());
+//            sensorPathBuilder.setConfig(new ConfigBuilder().setPath(paths.getTelemetrySensorPath())
+//                    .setExcludeFilter(paths.getSensorExcludeFilter()).build());
+            sensorPathList.add(sensorPathBuilder.build());
+        }
+        SensorPathsBuilder builder = new SensorPathsBuilder();
+        builder.setSensorPath(sensorPathList);
+        return builder.build();
+    }
+
+    private DestinationGroups convertDestination(List<TelemetryDestinationGroup> list) {
+        List<DestinationGroup> destinationGroupList = new ArrayList<>();
+        for (TelemetryDestinationGroup telemetryDestinationGroup : list) {
+            DestinationGroupBuilder builder = new DestinationGroupBuilder();
+            builder.setKey(new DestinationGroupKey(telemetryDestinationGroup.getDestinationGroupId()));
+            builder.setGroupId(telemetryDestinationGroup.getDestinationGroupId());
+            //builder.setConfig();
+            builder.setDestinations(convertDestinations(telemetryDestinationGroup.getDestinationProfile()));
+            destinationGroupList.add(builder.build());
+        }
+        DestinationGroupsBuilder destinationGroupsBuilder = new DestinationGroupsBuilder();
+        destinationGroupsBuilder.setDestinationGroup(destinationGroupList);
+        return destinationGroupsBuilder.build();
+    }
+
+    private Destinations convertDestinations(List<DestinationProfile> list) {
+        List<Destination> destinationList = new ArrayList<>();
+        for (DestinationProfile destinationProfile : list) {
+            DestinationBuilder destinationBuilder = new DestinationBuilder();
+            destinationBuilder.setKey(new DestinationKey(destinationProfile.getDestinationAddress(), destinationProfile.getDestinationPort()));
+            destinationBuilder.setDestinationAddress(destinationProfile.getDestinationAddress());
+            destinationBuilder.setDestinationPort(destinationProfile.getDestinationPort());
+            destinationList.add(destinationBuilder.build());
+        }
+        DestinationsBuilder builder = new DestinationsBuilder();
+        builder.setDestination(destinationList);
+        return builder.build();
+    }
+
+    private Subscriptions convertSubscription(List<TelemetrySubscription> list) {
+
+        List<Subscription> subscriptionList = new ArrayList<>();
+        for (TelemetrySubscription telemetrySubscription : list) {
+            SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder();
+            subscriptionBuilder.setKey(new SubscriptionKey(telemetrySubscription.getSubscriptionName()));
+            subscriptionBuilder.setSubscriptionName(telemetrySubscription.getSubscriptionName());
+            subscriptionBuilder.setConfig(convertLeafParamsOfSubscription(telemetrySubscription.getSubscriptionName(),
+                    telemetrySubscription.getLocalSourceAddress(), telemetrySubscription.getOriginatedQosMarking(),
+                    telemetrySubscription.getProtocolType(), telemetrySubscription.getEncodingType()));
+            subscriptionBuilder.setSensorProfiles(convertSensorProfiles(telemetrySubscription.getTelemetrySensor()));
+            subscriptionBuilder.setDestinationGroups(convertDestinationGroups(telemetrySubscription.getTelemetryDestination()));
+            subscriptionList.add(subscriptionBuilder.build());
+        }
+        PersistentBuilder persistentBuilder = new PersistentBuilder();
+        persistentBuilder.setSubscription(subscriptionList);
+        SubscriptionsBuilder subscriptionsBuilder = new SubscriptionsBuilder();
+        subscriptionsBuilder.setPersistent(persistentBuilder.build());
+        return subscriptionsBuilder.build();
+    }
+
+    private Config convertLeafParamsOfSubscription(String name, Ipv4Address address, Dscp qos,
+                                                   String protocolType, String encodingtype) {
+        org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+                .subscriptions.persistent.subscription.ConfigBuilder builder = new org.opendaylight.yang.gen.v1
+                .http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions
+                .persistent.subscription.ConfigBuilder();
+        builder.setSubscriptionName(name);
+        builder.setLocalSourceAddress(address);
+        if (null == qos) {
+            builder.setOriginatedQosMarking(null);
+        }
+        builder.setOriginatedQosMarking(qos);
+
+        if (null == protocolType) {
+            builder.setProtocol(STREAMGRPC.class);
+        } else {
+            if (protocolType.equals("STREAM_SSH")) {
+                builder.setProtocol(STREAMSSH.class);
+            } else if (protocolType.equals("STREAM_WEBSOCKET_RPC")) {
+                builder.setProtocol(STREAMWEBSOCKETRPC.class);
+            } else if (protocolType.equals("STREAM_JSON_RPC")) {
+                builder.setProtocol(STREAMJSONRPC.class);
+            } else {
+                builder.setProtocol(STREAMTHRIFTRPC.class);
+            }
+        }
+
+        if (null == encodingtype) {
+            builder.setEncoding(ENCPROTO3.class);
+        } else {
+            if (encodingtype.equals("ENC_XML")) {
+                builder.setEncoding(ENCXML.class);
+            } else {
+                builder.setEncoding(ENCJSONIETF.class);
+            }
+        }
+
+        return builder.build();
+    }
+
+    private SensorProfiles convertSensorProfiles(List<TelemetrySensor> list) {
+        List<SensorProfile> sensorProfileList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            SensorProfileBuilder sensorProfileBuilder = new SensorProfileBuilder();
+            sensorProfileBuilder.setKey(new SensorProfileKey(list.get(i).getSensorGroupId()));
+            sensorProfileBuilder.setSensorGroup(list.get(i).getSensorGroupId());
+            sensorProfileBuilder.setConfig(convertSensorProfilesConfig(list.get(i).getSensorGroupId(),
+                    list.get(i).getSampleInterval(), list.get(i).getHeartbeatInterval(),
+                    list.get(i).isSuppressRedundant()));
+            sensorProfileList.add(sensorProfileBuilder.build());
+        }
+        SensorProfilesBuilder builder = new SensorProfilesBuilder();
+        builder.setSensorProfile(sensorProfileList);
+        return builder.build();
+    }
+
+    private org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+            .subscriptions.persistent.subscription.sensor.profiles.sensor.profile.Config convertSensorProfilesConfig(
+            String id, BigInteger sam, BigInteger hea, Boolean sup) {
+        org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824
+                .telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.sensor.profile
+                .ConfigBuilder builder = new org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824
+                .telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.sensor.profile
+                .ConfigBuilder();
+        if (null == id) {
+            builder.setSensorGroup(null);
+        } else {
+            builder.setSensorGroup(id);
+        }
+
+        if (null == hea) {
+            builder.setHeartbeatInterval(null);
+        } else {
+            builder.setHeartbeatInterval(hea);
+        }
+
+        if (null == sup) {
+            builder.setSuppressRedundant(null);
+        } else {
+            builder.setSuppressRedundant(sup);
+        }
+
+        builder.setSampleInterval(sam);
+
+        return builder.build();
+    }
+
+    private org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+            .subscriptions.persistent.subscription.DestinationGroups convertDestinationGroups(List<TelemetryDestination> list) {
+        List<org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+                .subscriptions.persistent.subscription.destination.groups.DestinationGroup> destinationGroupList =
+                new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+                    .subscriptions.persistent.subscription.destination.groups.DestinationGroupBuilder
+                    destinationGroupBuilder = new org.opendaylight.yang.gen.v1.http.openconfig.net.yang
+                    .telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent
+                    .subscription.destination.groups.DestinationGroupBuilder();
+            destinationGroupBuilder.setKey(new org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry
+                    .rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.destination
+                    .groups.DestinationGroupKey(list.get(i).getDestinationGroupId()));
+            destinationGroupBuilder.setGroupId(list.get(i).getDestinationGroupId());
+            //destinationGroupBuilder.setConfig();
+            destinationGroupList.add(destinationGroupBuilder.build());
+        }
+        org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+                .subscriptions.persistent.subscription.DestinationGroupsBuilder builder = new org.opendaylight
+                .yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
+                .subscriptions.persistent.subscription.DestinationGroupsBuilder();
+        builder.setDestinationGroup(destinationGroupList);
+        return builder.build();
+    }
 }
