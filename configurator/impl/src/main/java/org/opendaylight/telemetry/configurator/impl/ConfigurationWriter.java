@@ -19,6 +19,16 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.Subscriptions;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.Persistent;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.Subscription;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.SubscriptionKey;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.DestinationGroups;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.SensorProfiles;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.destination.groups.DestinationGroup;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.destination.groups.DestinationGroupKey;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.SensorProfile;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.SensorProfileKey;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
@@ -62,6 +72,25 @@ public class ConfigurationWriter {
         }
 
         return write(OperateType.REPLACE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID, data);
+    }
+
+    public CheckedFuture<Void, TransactionCommitFailedException> delSubscription(String nodeId, String subscriptionName) {
+        return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
+                .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName)), null);
+    }
+
+    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionSensor(String nodeId, String subscriptionName,
+                                                                                       String sensorId) {
+        return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
+                .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName))
+                .child(SensorProfiles.class).child(SensorProfile.class, new SensorProfileKey(sensorId)), null);
+    }
+
+    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionDestination(String nodeId, String subscriptionName,
+                                                                                            String destinationId) {
+        return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
+                .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName))
+                .child(DestinationGroups.class).child(DestinationGroup.class, new DestinationGroupKey(destinationId)), null);
     }
 
     private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> write(
