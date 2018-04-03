@@ -10,20 +10,16 @@ module telemetry-datastorage {
     }
 
     grouping telemetry-data-model {
-        leaf version {
-            type uint32;
-        }
-
-        leaf system-id {
+        leaf node-id {
             type string;
         }
 
-        list metric-info {
+        list telemetry-data {
             leaf timestamp {
                 type uint64;
             }
 
-            leaf key-prefix {
+            leaf base-path {
                 type string;
             }
 
@@ -37,7 +33,13 @@ module telemetry-datastorage {
                 }
 
                 leaf value {
-                    type uint64;
+                    type union {
+                        type string;
+                        type int64;
+                        type uint64;
+                        //type uint32; yangtool bug
+                        //type int32; yangtool bug
+                    }
                 }
             }
         }
