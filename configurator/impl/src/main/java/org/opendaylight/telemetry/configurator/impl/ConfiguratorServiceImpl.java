@@ -34,7 +34,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     private DataProcessor dataProcessor;
     private ConfigurationWriter configurationWriter;
-    private static final String INPUT_NULL = "Input is null";
+    private static final String INPUT_NULL = "Input is null!";
     private static final String SENSOR_GROUP_NULL = "There is no sensor group provided by input!";
     private static final String SENSOR_PATHS = " sensor paths not provided by input!";
     private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
