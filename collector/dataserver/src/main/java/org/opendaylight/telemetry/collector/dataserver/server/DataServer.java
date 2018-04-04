@@ -18,8 +18,9 @@ import org.opendaylight.telemetry.proto.KeyValue;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
 
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.MetricInfo;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.MetricInfoBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryData;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryDataBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryData;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,34 +77,32 @@ public class DataServer {
 
         private void dataStorage(TelemetryStreamRequest telemetryStreamRequest) {
             DataStoreInputBuilder inputBuilder = new DataStoreInputBuilder();
-            String systemId = telemetryStreamRequest.getSystemId();
-            int version = telemetryStreamRequest.getVersion();
-            List<MetricInfo> metricInfoList = new ArrayList<>();
+            String nodeId = telemetryStreamRequest.getNodeId();
+            List<TelemetryData> telemetryDataList = new ArrayList<>();
 
-            for(Notification notification : telemetryStreamRequest.getNotificationList()) {
-                MetricInfoBuilder metricInfoBuilder = new MetricInfoBuilder();
-                List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model
-                        .metric.info.KeyValue> keyValueList = new ArrayList<>();
-                for(KeyValue keyValue : notification.getKvList()) {
-                    org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model
-                            .metric.info.KeyValueBuilder keyValueBuilder =
-                            new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry
-                                    .datastorage.rev180326.telemetry.data.model.metric.info.KeyValueBuilder();
+            for(RequestField requestField : telemetryStreamRequest.getFieldsList()) {
+                TelemetryDataBuilder telemetryDataBuilder = new TelemetryDataBuilder();
+                List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326
+                        .telemetry.data.model.telemetry.data.KeyValue> keyValueList = new ArrayList<>();
+
+                for(KeyValue keyValue : requestField.getKvList()) {
+                    org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326
+                            .telemetry.data.model.telemetry.data.KeyValueBuilder keyValueBuilder =
+                            new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326
+                                    .telemetry.data.model.telemetry.data.KeyValueBuilder();
                     keyValueBuilder.setKey(keyValue.getKey());
-                    keyValueBuilder.setValue(BigInteger.valueOf(keyValue.getValue().getUint64Val()));
+                    keyValueBuilder.setValue(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage
+                            .rev180326.telemetry.data.model.telemetry.data.KeyValue.Value(keyValue.getValue().getUint64Val()));
                     keyValueList.add(keyValueBuilder.build());
                 }
-                metricInfoBuilder.setKeyPrefix(notification.getKeyPrefix());
-                metricInfoBuilder.setSampleInterval(BigInteger.valueOf(notification.getSampleInterval()));
-                metricInfoBuilder.setTimestamp(BigInteger.valueOf(notification.getSampleInterval()));
-                metricInfoBuilder.setKeyValue(keyValueList);
-                metricInfoList.add(metricInfoBuilder.build());
+                telemetryDataBuilder.setBasePath(requestField.getBasePath());
+                telemetryDataBuilder.setSampleInterval(BigInteger.valueOf(requestField.getSampleInterval()));
+                telemetryDataBuilder.setTimestamp(BigInteger.valueOf(requestField.getSampleInterval()));
+                telemetryDataBuilder.setKeyValue(keyValueList);
             }
 
-            inputBuilder.setSystemId(systemId);
-            inputBuilder.setVersion((long)version);
-            inputBuilder.setMetricInfo(metricInfoList);
-
+            inputBuilder.setNodeId(nodeId);
+            inputBuilder.setTelemetryData(telemetryDataList);
             Future<RpcResult<Void>> future = telemetryDatastorageService.dataStore(inputBuilder.build());
             RPCFutures.logResult(future, "data-storage", LOG);
         }
@@ -115,7 +114,6 @@ public class DataServer {
                     dataStorage(telemetryStreamRequest);
                     TelemetryNotification.publish(telemetryStreamRequest);
                     TelemetryStreamResponse.Builder builder = TelemetryStreamResponse.newBuilder();
-                    builder.setCollectorId(getCollectorId());
                     responseObserver.onNext(builder.build());
                 }
 

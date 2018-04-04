@@ -66,19 +66,19 @@ public class DataStorageServiceImpl implements TelemetryDatastorageService {
             InsertTSDRMetricRecordInputBuilder builder = new InsertTSDRMetricRecordInputBuilder();
             builder.setCollectorCodeName("Telemetry");
             List<TSDRMetricRecord> tsdrMetricRecordList = new ArrayList<>();
-            String systemId = input.getSystemId();
-            input.getMetricInfo().forEach(metricInfo -> {
-                metricInfo.getKeyValue().forEach(keyValue -> {
+            String nodeId = input.getNodeId();
+            input.getTelemetryData().forEach(telemetryData -> {
+                telemetryData.getKeyValue().forEach(keyValue -> {
                     TSDRMetricRecordBuilder tsdrMetricRecordBuilder = new TSDRMetricRecordBuilder();
                     List<RecordKeys> recordKeysList = new ArrayList<>();
                     RecordKeysBuilder recordKeysBuilder = new RecordKeysBuilder();
                     recordKeysBuilder.setKeyName("OCPath");
-                    recordKeysBuilder.setKeyValue(systemId + ":" + metricInfo.getKeyPrefix() + "/" + keyValue.getKey());
+                    recordKeysBuilder.setKeyValue(nodeId + ":" + telemetryData.getBasePath() + "/" + keyValue.getKey());
                     recordKeysList.add(recordKeysBuilder.build());
                     tsdrMetricRecordBuilder.setMetricName(keyValue.getKey());
-                    tsdrMetricRecordBuilder.setMetricValue(BigDecimal.valueOf(keyValue.getValue().longValue()));
-                    tsdrMetricRecordBuilder.setNodeID(input.getSystemId());
-                    tsdrMetricRecordBuilder.setTimeStamp(metricInfo.getTimestamp().longValue());
+                    tsdrMetricRecordBuilder.setMetricValue(BigDecimal.valueOf(keyValue.getValue().getInt64()));
+                    tsdrMetricRecordBuilder.setNodeID(nodeId);
+                    tsdrMetricRecordBuilder.setTimeStamp(telemetryData.getTimestamp().longValue());
                     tsdrMetricRecordBuilder.setRecordKeys(recordKeysList);
                     tsdrMetricRecordBuilder.setTSDRDataCategory(DataCategory.EXTERNAL);
                     tsdrMetricRecordList.add(tsdrMetricRecordBuilder.build());
