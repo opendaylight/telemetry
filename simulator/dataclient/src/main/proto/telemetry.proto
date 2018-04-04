@@ -1,0 +1,39 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "org.opendaylight.telemetry.proto";
+option java_outer_classname = "TelemetryProto";
+
+package telemetry;
+
+service Telemetry {
+    rpc publish(stream TelemetryStreamRequest) returns (TelemetryStreamResponse) {};
+}
+
+message TypedValue {
+    oneof value {
+        string string_val = 1;
+        int64 int64_val = 2;
+        uint64 uint64_val = 3;
+        int32 int32_val = 4;
+        uint32 uint32_val = 5;
+    }
+}
+
+message KeyValue {
+    string key = 1;
+    TypedValue value = 2;
+}
+
+message RequestField {
+    uint64 timestamp = 1;
+    string base_path = 2;
+    uint64 sample_interval = 3;
+    repeated KeyValue kv = 4;
+}
+
+message TelemetryStreamRequest {
+    string node_id = 1;
+    repeated RequestField fields = 2;
+}
+
+message TelemetryStreamResponse {}

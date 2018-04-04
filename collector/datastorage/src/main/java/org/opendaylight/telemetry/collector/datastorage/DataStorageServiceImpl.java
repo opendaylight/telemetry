@@ -72,8 +72,8 @@ public class DataStorageServiceImpl implements TelemetryDatastorageService {
                     TSDRMetricRecordBuilder tsdrMetricRecordBuilder = new TSDRMetricRecordBuilder();
                     List<RecordKeys> recordKeysList = new ArrayList<>();
                     RecordKeysBuilder recordKeysBuilder = new RecordKeysBuilder();
-                    recordKeysBuilder.setKeyName("OCPath");
-                    recordKeysBuilder.setKeyValue(nodeId + ":" + telemetryData.getBasePath() + "/" + keyValue.getKey());
+                    recordKeysBuilder.setKeyName("OpenConfig-Path");
+                    recordKeysBuilder.setKeyValue(telemetryData.getBasePath() + "/" + keyValue.getKey());
                     recordKeysList.add(recordKeysBuilder.build());
                     tsdrMetricRecordBuilder.setMetricName(keyValue.getKey());
                     tsdrMetricRecordBuilder.setMetricValue(BigDecimal.valueOf(keyValue.getValue().getInt64()));

@@ -20,15 +20,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev18
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryData;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryDataBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryData;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -36,45 +33,25 @@ import java.util.concurrent.Future;
 /**
  * gRPC server that serve the Telemetry service.
  */
-public class DataServer {
-    private static final Logger LOG = LoggerFactory.getLogger(DataServer.class);
-    private final TelemetryDatastorageService telemetryDatastorageService;
-    private int port = 50051;
+public class DataServerImpl {
+    private static final Logger LOG = LoggerFactory.getLogger(DataServerImpl.class);
+    private final TelemetryDatastorageService datastorageService;
     private Server server;
 
-    public DataServer(final TelemetryDatastorageService telemetryDatastorageService) {
-        this.telemetryDatastorageService = telemetryDatastorageService;
+    public DataServerImpl(final int port, final TelemetryDatastorageService datastorageService) {
+        this.datastorageService = datastorageService;
         this.server = ServerBuilder.forPort(port).addService(new TelemetryService()).build();
     }
 
-    public void init() {
-        try {
-            server.start();
-            LOG.info("Telemetry data server started, listening on port " + port);
-        } catch (IOException e) {
-            LOG.error("Telemetry data server start failed.");
-            e.printStackTrace();
-        }
+    public void start() throws IOException {
+        server.start();
     }
 
-    public void close() {
-        if (server != null) {
-            server.shutdown();
-        }
-        LOG.info("Telemetry data server closed.");
+    public void stop() {
+        server.shutdownNow();
     }
-    
+
     private class TelemetryService extends TelemetryGrpc.TelemetryImplBase {
-        private String getCollectorId() {
-            String hostname;
-            try {
-                hostname =  InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException e) {
-                hostname = "Unknown";
-            }
-            return hostname;
-        }
-
         private void dataStorage(TelemetryStreamRequest telemetryStreamRequest) {
             DataStoreInputBuilder inputBuilder = new DataStoreInputBuilder();
             String nodeId = telemetryStreamRequest.getNodeId();
@@ -97,13 +74,14 @@ public class DataServer {
                 }
                 telemetryDataBuilder.setBasePath(requestField.getBasePath());
                 telemetryDataBuilder.setSampleInterval(BigInteger.valueOf(requestField.getSampleInterval()));
-                telemetryDataBuilder.setTimestamp(BigInteger.valueOf(requestField.getSampleInterval()));
+                telemetryDataBuilder.setTimestamp(BigInteger.valueOf(requestField.getTimestamp()));
                 telemetryDataBuilder.setKeyValue(keyValueList);
+                telemetryDataList.add(telemetryDataBuilder.build());
             }
 
             inputBuilder.setNodeId(nodeId);
             inputBuilder.setTelemetryData(telemetryDataList);
-            Future<RpcResult<Void>> future = telemetryDatastorageService.dataStore(inputBuilder.build());
+            Future<RpcResult<Void>> future = datastorageService.dataStore(inputBuilder.build());
             RPCFutures.logResult(future, "data-storage", LOG);
         }
 
