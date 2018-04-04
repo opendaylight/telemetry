@@ -10,13 +10,16 @@ package org.opendaylight.telemetry.configurator.impl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBrokerTest;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPaths;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPathsBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPathsKey;
@@ -63,11 +66,13 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node.telemetry.subscription.sensor.input.telemetry.node.telemetry.node.subscription.TelemetryNodeSubscriptionSensor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node.telemetry.subscription.sensor.input.telemetry.node.telemetry.node.subscription.TelemetryNodeSubscriptionSensorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node.telemetry.subscription.sensor.input.telemetry.node.telemetry.node.subscription.TelemetryNodeSubscriptionSensorKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.Telemetry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.TelemetryDestinationGroup;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.TelemetryDestinationGroupBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.TelemetryDestinationGroupKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.telemetry.destination.group.DestinationProfile;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.telemetry.destination.group.DestinationProfileBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.telemetry.destination.group.DestinationProfileKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.node.subscription.TelemetryNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.node.subscription.TelemetryNodeBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.node.subscription.TelemetryNodeKey;
@@ -80,6 +85,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yan
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetrySensor;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetrySensorBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetrySensorKey;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTest {
@@ -92,15 +98,24 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
 
     private static final String INPUT_NULL = "Input is null!";
     private static final String SENSOR_GROUP_NULL = "There is no sensor group provided by input!";
+    private static final String SENSOR_PATHS = " sensor paths not provided by input!";
+    private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
+    private static final String NO_SENSOR_GROUP = "No sensor group configured!";
     private static final String SENSOR_GROUP_ID_NULL = "There is no sensor group id provided by input!";
 
     private static final String DES_GROUP_NULL = "There is no destination group provided by input!";
     private static final String DES_FILE = " destination profile not provided by input!";
+    private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
+    private static final String NO_DES_GROUP = "No destination group configured!";
     private static final String DES_GROUP_ID_NULL = "There is no destination group id provided by input!";
+    private static final String NO_SUBSCR = "No node subscription configured!";
 
     private static final String NODE_NULL = "There is no node id provided by input!";
     private static final String SUBSCR_NULL = " no subscription provided by input!";
     private static final String NODE_SUBSCR_NULL = "Exist node not provide subscription!";
+    private static final String NODE_SUBSCR_SENSOR_NULL = "There is no sensor provided in node subscription!";
+    private static final String NODE_SUBSCR_DES_NULL = "There is no destination provided in node subscription!";
+    private static final String SUBSCR_PARAS_NULL = " exist Param is null! ";
     private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in" +
             " sensor is null or exist sensor not configured!";
     private static final String SUBSCR_DES_ABNORMAL = "Destination empty in node subscription" +
@@ -127,12 +142,24 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         Assert.assertFalse(result2.get().getResult().getConfigureResult().getResult().equals(false));
         Assert.assertEquals(SENSOR_GROUP_NULL, result2.get().getResult().getConfigureResult().getErrorCause());
 
-
         Future<RpcResult<AddTelemetrySensorOutput>> result3 = configuratorService
+                .addTelemetrySensor(constructAddTelemetrySensorInput("sensor1", null, "filter1", "sensor2", "path2", "filter2"));
+        Assert.assertTrue(result3.get().isSuccessful());
+        Assert.assertFalse(result3.get().getResult().getConfigureResult().getResult().equals(false));
+        Assert.assertEquals("sensor1" + SENSOR_PATHS, result3.get().getResult().getConfigureResult().getErrorCause());
+
+        Future<RpcResult<AddTelemetrySensorOutput>> result4 = configuratorService
                 .addTelemetrySensor(constructAddTelemetrySensorInput("sensor1", "path1", "filter1",
                         "sensor2", "path2", "filter2"));
-        Assert.assertTrue(result3.get().isSuccessful());
-        Assert.assertFalse(result3.get().getResult().getConfigureResult().getResult().equals(true));
+        Assert.assertTrue(result4.get().isSuccessful());
+        Assert.assertFalse(result4.get().getResult().getConfigureResult().getResult().equals(true));
+
+        addSensorToDataStore("sensor1", "path1", "filter");
+        Future<RpcResult<AddTelemetrySensorOutput>> result5 = configuratorService
+                .addTelemetrySensor(constructAddTelemetrySensorInput("sensor1", "path1", "filter1", "sensor2", "path2", "filter2"));
+        Assert.assertTrue(result5.get().isSuccessful());
+        Assert.assertFalse(result5.get().getResult().getConfigureResult().getResult().equals(true));
+        Assert.assertEquals(SENSOR_GROUP_EXIST, result5.get().getResult().getConfigureResult().getErrorCause());
     }
 
     @Test
@@ -143,6 +170,10 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         QueryTelemetrySensorInputBuilder builder = new QueryTelemetrySensorInputBuilder();
         Future<RpcResult<QueryTelemetrySensorOutput>> result2 = configuratorService.queryTelemetrySensor(builder.build());
         Assert.assertEquals(1, result2.get().getErrors().size());
+
+        addSensorToDataStore("sensor1", "path1", "filter1");
+        Future<RpcResult<QueryTelemetrySensorOutput>> result3 = configuratorService.queryTelemetrySensor(builder.build());
+        Assert.assertTrue(result3.get().isSuccessful());
     }
 
     @Test
@@ -189,6 +220,13 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .addTelemetryDestination(constructAddTelemetryDestinationInput("des1", "10.42.89.15", 50051));
         Assert.assertTrue(result4.get().isSuccessful());
         Assert.assertFalse(result4.get().getResult().getConfigureResult().getResult().equals(true));
+
+        addDesToDataStore("des1", "10.42.89.15", 50051);
+        Future<RpcResult<AddTelemetryDestinationOutput>> result5 = configuratorService
+                .addTelemetryDestination(constructAddTelemetryDestinationInput("des1", "10.42.89.15", 50051));
+        Assert.assertTrue(result5.get().isSuccessful());
+        Assert.assertFalse(result5.get().getResult().getConfigureResult().getResult().equals(false));
+        Assert.assertEquals(DES_GROUP_EXIST, result5.get().getResult().getConfigureResult().getErrorCause());
     }
 
     @Test
@@ -199,6 +237,10 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         QueryTelemetryDestinationInputBuilder builder = new QueryTelemetryDestinationInputBuilder();
         Future<RpcResult<QueryTelemetryDestinationOutput>> result2 = configuratorService.queryTelemetryDestination(builder.build());
         Assert.assertEquals(1, result2.get().getErrors().size());
+
+        addDesToDataStore("des1", "10.42.89.15", 50051);
+        Future<RpcResult<QueryTelemetryDestinationOutput>> result3 = configuratorService.queryTelemetryDestination(builder.build());
+        Assert.assertTrue(result3.get().isSuccessful());
     }
 
     @Test
@@ -244,6 +286,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         Assert.assertFalse(result3.get().getResult().getConfigureResult().getResult().equals(false));
         Assert.assertEquals("node1" + SUBSCR_NULL, result3.get().getResult().getConfigureResult().getErrorCause());
 
+        addDesToDataStore("des2", "10.22.22.22", 50051);
         Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> result4 = configuratorService
                 .configureNodeTelemetrySubscription(constructConfigureSubscriptionInput("node1",
                         "sub1", "10.23.23.23", null, "des1", null));
@@ -251,39 +294,49 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         Assert.assertFalse(result4.get().getResult().getConfigureResult().getResult().equals(false));
         Assert.assertEquals(SUBSCR_DES_ABNORMAL, result4.get().getResult().getConfigureResult().getErrorCause());
 
+        addDesToDataStore("des1", "10.42.89.15", 50051);
         Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> result5 = configuratorService
                 .configureNodeTelemetrySubscription(constructConfigureSubscriptionInput("node1",
-                        "sub1", "10.23.23.23", "sensor1", null, null));
+                        "sub1", "10.23.23.23", null, "des1", null));
         Assert.assertTrue(result5.get().isSuccessful());
-        Assert.assertFalse(result5.get().getResult().getConfigureResult().getResult().equals(false));
-        Assert.assertEquals(SUBSCR_SENSOR_ABNORMAL, result5.get().getResult().getConfigureResult().getErrorCause());
 
+
+        addSensorToDataStore("sensor2", "path2", "filter2");
         Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> result6 = configuratorService
                 .configureNodeTelemetrySubscription(constructConfigureSubscriptionInput("node1",
-                        "sub1", "10.23.23.23", "sensor1", null, new BigInteger("100")));
+                        "sub1", "10.23.23.23", "sensor1", null, null));
         Assert.assertTrue(result6.get().isSuccessful());
         Assert.assertFalse(result6.get().getResult().getConfigureResult().getResult().equals(false));
         Assert.assertEquals(SUBSCR_SENSOR_ABNORMAL, result6.get().getResult().getConfigureResult().getErrorCause());
 
+        addSensorToDataStore("sensor1", "path1", "filter1");
         Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> result7 = configuratorService
                 .configureNodeTelemetrySubscription(constructConfigureSubscriptionInput("node1",
-                        "sub1", "10.23.23.23", "sensor1", "des1", new BigInteger("100")));
+                        "sub1", "10.23.23.23", "sensor1", null, new BigInteger("100")));
         Assert.assertTrue(result7.get().isSuccessful());
-        Assert.assertFalse(result7.get().getResult().getConfigureResult().getResult().equals(false));
-        Assert.assertEquals(SUBSCR_SENSOR_ABNORMAL, result7.get().getResult().getConfigureResult().getErrorCause());
+
+        Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> result8 = configuratorService
+                .configureNodeTelemetrySubscription(constructConfigureSubscriptionInput("node1",
+                        "sub1", "10.23.23.23", "sensor1", "des1", new BigInteger("100")));
+        Assert.assertTrue(result8.get().isSuccessful());
     }
 
-        @Test
-        public void testQueryNodeTelemetrySubscription() throws Exception {
-            Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result1 = configuratorService
-                    .queryNodeTelemetrySubscription(null);
-            Assert.assertEquals(1, result1.get().getErrors().size());
+    @Test
+    public void testQueryNodeTelemetrySubscription() throws Exception {
+        Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result1 = configuratorService
+                .queryNodeTelemetrySubscription(null);
+        Assert.assertEquals(1, result1.get().getErrors().size());
 
-            QueryNodeTelemetrySubscriptionInputBuilder builder = new QueryNodeTelemetrySubscriptionInputBuilder();
-            Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result2 = configuratorService
-                    .queryNodeTelemetrySubscription(builder.build());
-            Assert.assertEquals(1, result2.get().getErrors().size());
-        }
+        QueryNodeTelemetrySubscriptionInputBuilder builder = new QueryNodeTelemetrySubscriptionInputBuilder();
+        Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result2 = configuratorService
+                .queryNodeTelemetrySubscription(builder.build());
+        Assert.assertEquals(1, result2.get().getErrors().size());
+
+        addNodeSubToDataStore("node1", "sub1", "10.42.89.15", "sensor1", new BigInteger("100"), "des1");
+        Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result3 = configuratorService
+                .queryNodeTelemetrySubscription(builder.build());
+        Assert.assertTrue(result3.get().isSuccessful());
+    }
 
     @Test
     public void testDeleteNodeTelemetrySubscription() throws Exception {
@@ -337,13 +390,11 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .deleteNodeTelemetrySubscriptionSensor(constructDelSubSensorInput("node1", "sub1", null));
         Assert.assertTrue(result4.get().isSuccessful());
         Assert.assertFalse(result4.get().getResult().getConfigureResult().getResult().equals(false));
-        Assert.assertEquals(NODE_SUBSCR_NULL, result4.get().getResult().getConfigureResult().getErrorCause());
+        Assert.assertEquals(NODE_SUBSCR_SENSOR_NULL, result4.get().getResult().getConfigureResult().getErrorCause());
 
         Future<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>> result5 = configuratorService
                 .deleteNodeTelemetrySubscriptionSensor(constructDelSubSensorInput("node1", "sub1", "sensor1"));
         Assert.assertTrue(result5.get().isSuccessful());
-        Assert.assertFalse(result5.get().getResult().getConfigureResult().getResult().equals(false));
-        Assert.assertEquals(NODE_SUBSCR_NULL, result5.get().getResult().getConfigureResult().getErrorCause());
     }
 
     @Test
@@ -371,47 +422,75 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .deleteNodeTelemetrySubscriptionDestination(constructDelSubDesInput("node1", "sub1", null));
         Assert.assertTrue(result4.get().isSuccessful());
         Assert.assertFalse(result4.get().getResult().getConfigureResult().getResult().equals(false));
-        Assert.assertEquals(NODE_SUBSCR_NULL, result4.get().getResult().getConfigureResult().getErrorCause());
+        Assert.assertEquals(NODE_SUBSCR_DES_NULL, result4.get().getResult().getConfigureResult().getErrorCause());
 
         Future<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>> result5 = configuratorService
                 .deleteNodeTelemetrySubscriptionDestination(constructDelSubDesInput("node1", "sub1", "des1"));
         Assert.assertTrue(result5.get().isSuccessful());
-        Assert.assertFalse(result5.get().getResult().getConfigureResult().getResult().equals(false));
-        Assert.assertEquals(NODE_SUBSCR_NULL, result5.get().getResult().getConfigureResult().getErrorCause());
     }
 
     private AddTelemetrySensorInput constructAddTelemetrySensorInput(String sensor1, String path1, String filter1,
                                                                      String sensor2, String path2, String filter2) {
-        TelemetrySensorPathsBuilder sensorPathsBuilder1 = new TelemetrySensorPathsBuilder();
-        sensorPathsBuilder1.setKey(new TelemetrySensorPathsKey(path1));
-        sensorPathsBuilder1.setTelemetrySensorPath(path1);
-        sensorPathsBuilder1.setSensorExcludeFilter(filter1);
-        List<TelemetrySensorPaths> pathsList1 = new ArrayList<>();
-        pathsList1.add(sensorPathsBuilder1.build());
         TelemetrySensorGroupBuilder sensorGroupBuilder1 = new TelemetrySensorGroupBuilder();
         sensorGroupBuilder1.setKey(new TelemetrySensorGroupKey(sensor1));
         sensorGroupBuilder1.setTelemetrySensorGroupId(sensor1);
-        sensorGroupBuilder1.setTelemetrySensorPaths(pathsList1);
+        if (null == path1) {
+            sensorGroupBuilder1.setTelemetrySensorPaths(null);
+        } else {
+            TelemetrySensorPathsBuilder sensorPathsBuilder1 = new TelemetrySensorPathsBuilder();
+            sensorPathsBuilder1.setKey(new TelemetrySensorPathsKey(path1));
+            sensorPathsBuilder1.setTelemetrySensorPath(path1);
+            sensorPathsBuilder1.setSensorExcludeFilter(filter1);
+            List<TelemetrySensorPaths> pathsList1 = new ArrayList<>();
+            pathsList1.add(sensorPathsBuilder1.build());
+            sensorGroupBuilder1.setTelemetrySensorPaths(pathsList1);
 
+        }
         List<TelemetrySensorGroup> list = new ArrayList<>();
         list.add(sensorGroupBuilder1.build());
 
-        TelemetrySensorPathsBuilder sensorPathsBuilder2 = new TelemetrySensorPathsBuilder();
-        sensorPathsBuilder2.setKey(new TelemetrySensorPathsKey(path2));
-        sensorPathsBuilder2.setTelemetrySensorPath(path2);
-        sensorPathsBuilder2.setSensorExcludeFilter(filter2);
-        List<TelemetrySensorPaths> pathsList2 = new ArrayList<>();
-        pathsList2.add(sensorPathsBuilder1.build());
         TelemetrySensorGroupBuilder sensorGroupBuilder2 = new TelemetrySensorGroupBuilder();
         sensorGroupBuilder2.setKey(new TelemetrySensorGroupKey(sensor2));
         sensorGroupBuilder2.setTelemetrySensorGroupId(sensor2);
-        sensorGroupBuilder2.setTelemetrySensorPaths(pathsList2);
-
+        if (null == path2) {
+            sensorGroupBuilder2.setTelemetrySensorPaths(null);
+        } else {
+            TelemetrySensorPathsBuilder sensorPathsBuilder2 = new TelemetrySensorPathsBuilder();
+            sensorPathsBuilder2.setKey(new TelemetrySensorPathsKey(path2));
+            sensorPathsBuilder2.setTelemetrySensorPath(path2);
+            sensorPathsBuilder2.setSensorExcludeFilter(filter2);
+            List<TelemetrySensorPaths> pathsList2 = new ArrayList<>();
+            pathsList2.add(sensorPathsBuilder2.build());
+            sensorGroupBuilder2.setTelemetrySensorPaths(pathsList2);
+        }
         list.add(sensorGroupBuilder2.build());
 
         AddTelemetrySensorInputBuilder builder = new AddTelemetrySensorInputBuilder();
         builder.setTelemetrySensorGroup(list);
         return builder.build();
+    }
+
+    private void addSensorToDataStore(String sensor, String path, String filter) {
+        final ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
+        final InstanceIdentifier<TelemetrySensorGroup> sensorGroupPath = InstanceIdentifier.create(Telemetry.class)
+                .child(TelemetrySensorGroup.class, new TelemetrySensorGroupKey(sensor));
+        TelemetrySensorGroupBuilder builder = new TelemetrySensorGroupBuilder();
+        builder.setKey(new TelemetrySensorGroupKey(sensor));
+        builder.setTelemetrySensorGroupId(sensor);
+        TelemetrySensorPathsBuilder pathsBuilder = new TelemetrySensorPathsBuilder();
+        pathsBuilder.setKey(new TelemetrySensorPathsKey(path));
+        pathsBuilder.setTelemetrySensorPath(path);
+        pathsBuilder.setSensorExcludeFilter(filter);
+        List<TelemetrySensorPaths> list = new ArrayList<>();
+        list.add(pathsBuilder.build());
+        builder.setTelemetrySensorPaths(list);
+
+        tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
+        try {
+            tx.submit().get();
+        } catch (InterruptedException | ExecutionException e) {
+            return;
+        }
     }
 
     private DeleteTelemetrySensorInput constructDelTelemetrySensorInput(String sensorId) {
@@ -449,6 +528,29 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         list.add(groupBuilder.build());
         AddTelemetryDestinationInputBuilder builder = new AddTelemetryDestinationInputBuilder();
         return builder.setTelemetryDestinationGroup(list).build();
+    }
+
+    private void addDesToDataStore(String desId, String ip, Integer port) {
+        final ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
+        final InstanceIdentifier<TelemetryDestinationGroup> desGroupPath = InstanceIdentifier.create(Telemetry.class)
+                .child(TelemetryDestinationGroup.class, new TelemetryDestinationGroupKey(desId));
+        TelemetryDestinationGroupBuilder builder = new TelemetryDestinationGroupBuilder();
+        builder.setKey(new TelemetryDestinationGroupKey(desId));
+        builder.setDestinationGroupId(desId);
+        DestinationProfileBuilder profileBuilder = new DestinationProfileBuilder();
+        profileBuilder.setKey(new DestinationProfileKey(new Ipv4Address(ip), port));
+        profileBuilder.setDestinationAddress(new Ipv4Address(ip));
+        profileBuilder.setDestinationPort(port);
+        List<DestinationProfile> list = new ArrayList<>();
+        list.add(profileBuilder.build());
+        builder.setDestinationProfile(list);
+
+        tx.put(LogicalDatastoreType.CONFIGURATION, desGroupPath, builder.build(), true);
+        try {
+            tx.submit().get();
+        } catch (InterruptedException | ExecutionException e) {
+            return;
+        }
     }
 
     private DeleteTelemetryDestinationInput constructDelTelemetryDesInput(String desId) {
@@ -514,6 +616,39 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         return builder.setTelemetryNode(nodeList).build();
     }
 
+    private void addNodeSubToDataStore(String nodeId, String subId, String ip, String sensorId,
+                                       BigInteger sample, String desId) {
+        final ReadWriteTransaction tx = getDataBroker().newReadWriteTransaction();
+        final InstanceIdentifier<TelemetrySubscription> sensorGroupPath = InstanceIdentifier.create(Telemetry.class)
+                .child(TelemetryNode.class, new TelemetryNodeKey(nodeId)).child(TelemetrySubscription.class,
+                        new TelemetrySubscriptionKey(subId));
+        TelemetrySubscriptionBuilder builder = new TelemetrySubscriptionBuilder();
+        builder.setKey(new TelemetrySubscriptionKey(subId));
+        builder.setSubscriptionName(subId);
+        builder.setLocalSourceAddress(new Ipv4Address(ip));
+        TelemetrySensorBuilder sensorBuilder = new TelemetrySensorBuilder();
+        sensorBuilder.setKey(new TelemetrySensorKey(sensorId));
+        sensorBuilder.setSensorGroupId(sensorId);
+        sensorBuilder.setSampleInterval(sample);
+        List<TelemetrySensor> sensorList = new ArrayList<>();
+        sensorList.add(sensorBuilder.build());
+        builder.setTelemetrySensor(sensorList);
+
+        TelemetryDestinationBuilder destinationBuilder = new TelemetryDestinationBuilder();
+        destinationBuilder.setKey(new TelemetryDestinationKey(desId));
+        destinationBuilder.setDestinationGroupId(desId);
+        List<TelemetryDestination> destinationList = new ArrayList<>();
+        destinationList.add(destinationBuilder.build());
+        builder.setTelemetryDestination(destinationList);
+
+        tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
+        try {
+            tx.submit().get();
+        } catch (InterruptedException | ExecutionException e) {
+            return;
+        }
+    }
+
     private DeleteNodeTelemetrySubscriptionInput constructDelSubInput(String nodeId, String subId) {
         org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete
                 .node.telemetry.subscription.input.TelemetryNodeBuilder nodeBuilder = new org.opendaylight.yang.gen
@@ -571,6 +706,11 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 sensorList.add(sensorBuilder.build());
                 subscriptionBuilder.setTelemetryNodeSubscriptionSensor(sensorList);
             }
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api
+                    .rev171120.delete.node.telemetry.subscription.sensor.input.telemetry.node
+                    .TelemetryNodeSubscription> subscriptionList = new ArrayList<>();
+            subscriptionList.add(subscriptionBuilder.build());
+            nodeBuilder.setTelemetryNodeSubscription(subscriptionList);
         }
 
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120
@@ -611,6 +751,11 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 destinationList.add(destinationBuilder.build());
                 subscriptionBuilder.setTelemetryNodeSubscriptionDestination(destinationList);
             }
+            List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api
+                    .rev171120.delete.node.telemetry.subscription.destination.input.telemetry.node
+                    .TelemetryNodeSubscription> subscriptionList = new ArrayList<>();
+            subscriptionList.add(subscriptionBuilder.build());
+            nodeBuilder.setTelemetryNodeSubscription(subscriptionList);
         }
 
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120
