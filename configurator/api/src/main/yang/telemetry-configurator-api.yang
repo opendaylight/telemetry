@@ -183,4 +183,15 @@ module telemetry-configurator-api {
         }
     }
 
+    rpc query-device-data {
+       input {
+          leaf telemetry-node {
+             type string;
+          }
+       }
+
+       output {
+       }
+    }
+
 }

@@ -382,6 +382,12 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
+    public Future<RpcResult<QueryDeviceDataOutput>> queryDeviceData(QueryDeviceDataInput input) {
+        //configurationWriter.query(input.getTelemetryNode());
+        QueryDeviceDataOutputBuilder builder = new QueryDeviceDataOutputBuilder();
+        return RpcResultBuilder.success(builder.build()).buildFuture();
+    }
+
     private boolean checkSensorGroupExistedInDataStore(List<TelemetrySensorGroup> sensorGroupList) {
         LOG.info("Get sensor group from data store");
         List<TelemetrySensorGroup> allSensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
