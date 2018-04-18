@@ -14,9 +14,11 @@ import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.Subscriptions;
@@ -195,6 +197,30 @@ public class ConfigurationWriter {
         } else {
             LOG.warn(NETCONF_EDIT_FAILUE + detailedInfo + BLANK + throwable.getMessage());
         }
+    }
+
+    public void query(String nodeId) {
+        DataBroker dataBroker = getDataBroker(nodeId, mountPointService);
+        if (null != readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID)) {
+            LOG.info("Data is {}", readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID));
+        } else {
+            LOG.info("Device data is null!");
+        }
+    }
+
+    private <T extends DataObject> T readData(DataBroker nodeDataBroker, InstanceIdentifier<T> path) {
+        final ReadTransaction readTransaction = nodeDataBroker.newReadOnlyTransaction();
+        Optional<T> optionalData;
+        try {
+            optionalData = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
+            if (optionalData.isPresent()) {
+                LOG.info("Data is not null");
+                return optionalData.get();
+            }
+        } catch (ReadFailedException e) {
+            LOG.warn("Failed to read {}", path, e);
+        }
+        return null;
     }
 
 }

@@ -383,7 +383,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     public Future<RpcResult<QueryDeviceDataOutput>> queryDeviceData(QueryDeviceDataInput input) {
-        //configurationWriter.query(input.getTelemetryNode());
+        configurationWriter.query(input.getTelemetryNode());
         QueryDeviceDataOutputBuilder builder = new QueryDeviceDataOutputBuilder();
         return RpcResultBuilder.success(builder.build()).buildFuture();
     }
