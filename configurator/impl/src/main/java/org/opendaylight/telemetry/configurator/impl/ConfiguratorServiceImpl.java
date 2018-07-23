@@ -10,6 +10,7 @@ package org.opendaylight.telemetry.configurator.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPaths;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
@@ -65,7 +66,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
+    public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         //check input
         AddTelemetrySensorOutputBuilder builder = new AddTelemetrySensorOutputBuilder();
         if (null == input) {
@@ -98,7 +99,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<QueryTelemetrySensorOutput>> queryTelemetrySensor(QueryTelemetrySensorInput input) {
+    public ListenableFuture<RpcResult<QueryTelemetrySensorOutput>> queryTelemetrySensor(QueryTelemetrySensorInput input) {
         if (null == input) {
             return rpcErr(INPUT_NULL);
         }
@@ -113,7 +114,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<DeleteTelemetrySensorOutput>> deleteTelemetrySensor(DeleteTelemetrySensorInput input) {
+    public ListenableFuture<RpcResult<DeleteTelemetrySensorOutput>> deleteTelemetrySensor(DeleteTelemetrySensorInput input) {
         //check input
         DeleteTelemetrySensorOutputBuilder builder = new DeleteTelemetrySensorOutputBuilder();
         if (null == input) {
@@ -134,7 +135,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<AddTelemetryDestinationOutput>> addTelemetryDestination(AddTelemetryDestinationInput input) {
+    public ListenableFuture<RpcResult<AddTelemetryDestinationOutput>> addTelemetryDestination(AddTelemetryDestinationInput input) {
         //check input
         AddTelemetryDestinationOutputBuilder builder = new AddTelemetryDestinationOutputBuilder();
         if (null == input) {
@@ -166,7 +167,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<QueryTelemetryDestinationOutput>> queryTelemetryDestination(QueryTelemetryDestinationInput input) {
+    public ListenableFuture<RpcResult<QueryTelemetryDestinationOutput>> queryTelemetryDestination(QueryTelemetryDestinationInput input) {
         //check input
         if (null == input) {
             return rpcErr(INPUT_NULL);
@@ -182,7 +183,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<DeleteTelemetryDestinationOutput>> deleteTelemetryDestination(DeleteTelemetryDestinationInput input) {
+    public ListenableFuture<RpcResult<DeleteTelemetryDestinationOutput>> deleteTelemetryDestination(DeleteTelemetryDestinationInput input) {
         //check input
         DeleteTelemetryDestinationOutputBuilder builder = new DeleteTelemetryDestinationOutputBuilder();
         if (null == input) {
@@ -203,7 +204,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> configureNodeTelemetrySubscription(ConfigureNodeTelemetrySubscriptionInput input) {
+    public ListenableFuture<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> configureNodeTelemetrySubscription(ConfigureNodeTelemetrySubscriptionInput input) {
         //check input
         ConfigureNodeTelemetrySubscriptionOutputBuilder builder = new ConfigureNodeTelemetrySubscriptionOutputBuilder();
         if (null == input) {
@@ -247,7 +248,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelemetrySubscription(QueryNodeTelemetrySubscriptionInput input) {
+    public ListenableFuture<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelemetrySubscription(QueryNodeTelemetrySubscriptionInput input) {
         //check input
         if (null == input) {
             return rpcErr(INPUT_NULL);
@@ -263,7 +264,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<DeleteNodeTelemetrySubscriptionOutput>> deleteNodeTelemetrySubscription(DeleteNodeTelemetrySubscriptionInput input) {
+    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionOutput>> deleteNodeTelemetrySubscription(DeleteNodeTelemetrySubscriptionInput input) {
         //check input
         DeleteNodeTelemetrySubscriptionOutputBuilder builder = new DeleteNodeTelemetrySubscriptionOutputBuilder();
         if (null == input) {
@@ -298,7 +299,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>> deleteNodeTelemetrySubscriptionSensor(DeleteNodeTelemetrySubscriptionSensorInput input) {
+    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>> deleteNodeTelemetrySubscriptionSensor(DeleteNodeTelemetrySubscriptionSensorInput input) {
         DeleteNodeTelemetrySubscriptionSensorOutputBuilder builder = new DeleteNodeTelemetrySubscriptionSensorOutputBuilder();
         if (null == input) {
             builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
@@ -340,7 +341,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public Future<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>> deleteNodeTelemetrySubscriptionDestination(DeleteNodeTelemetrySubscriptionDestinationInput input) {
+    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>> deleteNodeTelemetrySubscriptionDestination(DeleteNodeTelemetrySubscriptionDestinationInput input) {
         DeleteNodeTelemetrySubscriptionDestinationOutputBuilder builder = new DeleteNodeTelemetrySubscriptionDestinationOutputBuilder();
         if (null == input) {
             builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
@@ -382,7 +383,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         return RpcResultBuilder.success(builder.build()).buildFuture();
     }
 
-    public Future<RpcResult<QueryDeviceDataOutput>> queryDeviceData(QueryDeviceDataInput input) {
+    public ListenableFuture<RpcResult<QueryDeviceDataOutput>> queryDeviceData(QueryDeviceDataInput input) {
         configurationWriter.query(input.getTelemetryNode());
         QueryDeviceDataOutputBuilder builder = new QueryDeviceDataOutputBuilder();
         return RpcResultBuilder.success(builder.build()).buildFuture();
@@ -481,7 +482,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         return cfgResultBuilder.build();
     }
 
-    private <T> Future<RpcResult<T>> rpcErr(String errMsg) {
+    private <T> ListenableFuture<RpcResult<T>> rpcErr(String errMsg) {
         return RpcResultBuilder.<T>failed().withError(RpcError.ErrorType.APPLICATION, errMsg).buildFuture();
     }
 

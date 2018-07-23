@@ -106,7 +106,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
 
     private TelemetrySubscription constructNodeSub(String subId, String ip, String sensorId, String sam, String desId) {
         TelemetrySubscriptionBuilder subscriptionBuilder = new TelemetrySubscriptionBuilder();
-        subscriptionBuilder.setKey(new TelemetrySubscriptionKey(subId));
+        subscriptionBuilder.withKey(new TelemetrySubscriptionKey(subId));
         subscriptionBuilder.setSubscriptionName(subId);
         subscriptionBuilder.setLocalSourceAddress(new Ipv4Address(ip));
 
@@ -114,7 +114,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
             subscriptionBuilder.setTelemetrySensor(null);
         } else {
             TelemetrySensorBuilder sensorBuilder = new TelemetrySensorBuilder();
-            sensorBuilder.setKey(new TelemetrySensorKey(sensorId));
+            sensorBuilder.withKey(new TelemetrySensorKey(sensorId));
             sensorBuilder.setSensorGroupId(sensorId);
             sensorBuilder.setSampleInterval(new BigInteger(sam));
             List<TelemetrySensor> sensorList = new ArrayList<>();
@@ -126,7 +126,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
             subscriptionBuilder.setTelemetryDestination(null);
         } else {
             TelemetryDestinationBuilder destinationBuilder = new TelemetryDestinationBuilder();
-            destinationBuilder.setKey(new TelemetryDestinationKey(desId));
+            destinationBuilder.withKey(new TelemetryDestinationKey(desId));
             destinationBuilder.setDestinationGroupId(desId);
             List<TelemetryDestination> destinationList = new ArrayList<>();
             destinationList.add(destinationBuilder.build());
@@ -141,7 +141,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
         final InstanceIdentifier<TelemetryNode> path = InstanceIdentifier.create(Telemetry.class)
                 .child(TelemetryNode.class, new TelemetryNodeKey(nodeId));
         TelemetryNodeBuilder nodeBuilder = new TelemetryNodeBuilder();
-        nodeBuilder.setKey(new TelemetryNodeKey(nodeId));
+        nodeBuilder.withKey(new TelemetryNodeKey(nodeId));
         nodeBuilder.setNodeId(nodeId);
         nodeBuilder.setTelemetrySubscription(subscriptionList);
         tx.put(LogicalDatastoreType.CONFIGURATION, path, nodeBuilder.build(), true);
@@ -157,10 +157,10 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
         final InstanceIdentifier<TelemetrySensorGroup> sensorGroupPath = InstanceIdentifier.create(Telemetry.class)
                 .child(TelemetrySensorGroup.class, new TelemetrySensorGroupKey(sensor));
         TelemetrySensorGroupBuilder builder = new TelemetrySensorGroupBuilder();
-        builder.setKey(new TelemetrySensorGroupKey(sensor));
+        builder.withKey(new TelemetrySensorGroupKey(sensor));
         builder.setTelemetrySensorGroupId(sensor);
         TelemetrySensorPathsBuilder pathsBuilder = new TelemetrySensorPathsBuilder();
-        pathsBuilder.setKey(new TelemetrySensorPathsKey(path));
+        pathsBuilder.withKey(new TelemetrySensorPathsKey(path));
         pathsBuilder.setTelemetrySensorPath(path);
         List<TelemetrySensorPaths> list = new ArrayList<>();
         list.add(pathsBuilder.build());
@@ -179,10 +179,10 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
         final InstanceIdentifier<TelemetryDestinationGroup> desGroupPath = InstanceIdentifier.create(Telemetry.class)
                 .child(TelemetryDestinationGroup.class, new TelemetryDestinationGroupKey(desId));
         TelemetryDestinationGroupBuilder builder = new TelemetryDestinationGroupBuilder();
-        builder.setKey(new TelemetryDestinationGroupKey(desId));
+        builder.withKey(new TelemetryDestinationGroupKey(desId));
         builder.setDestinationGroupId(desId);
         DestinationProfileBuilder profileBuilder = new DestinationProfileBuilder();
-        profileBuilder.setKey(new DestinationProfileKey(new Ipv4Address(ip), port));
+        profileBuilder.withKey(new DestinationProfileKey(new Ipv4Address(ip), port));
         profileBuilder.setDestinationAddress(new Ipv4Address(ip));
         profileBuilder.setDestinationPort(port);
         List<DestinationProfile> list = new ArrayList<>();

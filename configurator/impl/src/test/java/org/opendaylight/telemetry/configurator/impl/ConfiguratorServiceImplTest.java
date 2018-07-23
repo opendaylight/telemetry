@@ -432,13 +432,13 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
     private AddTelemetrySensorInput constructAddTelemetrySensorInput(String sensor1, String path1, String filter1,
                                                                      String sensor2, String path2, String filter2) {
         TelemetrySensorGroupBuilder sensorGroupBuilder1 = new TelemetrySensorGroupBuilder();
-        sensorGroupBuilder1.setKey(new TelemetrySensorGroupKey(sensor1));
+        sensorGroupBuilder1.withKey(new TelemetrySensorGroupKey(sensor1));
         sensorGroupBuilder1.setTelemetrySensorGroupId(sensor1);
         if (null == path1) {
             sensorGroupBuilder1.setTelemetrySensorPaths(null);
         } else {
             TelemetrySensorPathsBuilder sensorPathsBuilder1 = new TelemetrySensorPathsBuilder();
-            sensorPathsBuilder1.setKey(new TelemetrySensorPathsKey(path1));
+            sensorPathsBuilder1.withKey(new TelemetrySensorPathsKey(path1));
             sensorPathsBuilder1.setTelemetrySensorPath(path1);
             sensorPathsBuilder1.setSensorExcludeFilter(filter1);
             List<TelemetrySensorPaths> pathsList1 = new ArrayList<>();
@@ -450,13 +450,13 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         list.add(sensorGroupBuilder1.build());
 
         TelemetrySensorGroupBuilder sensorGroupBuilder2 = new TelemetrySensorGroupBuilder();
-        sensorGroupBuilder2.setKey(new TelemetrySensorGroupKey(sensor2));
+        sensorGroupBuilder2.withKey(new TelemetrySensorGroupKey(sensor2));
         sensorGroupBuilder2.setTelemetrySensorGroupId(sensor2);
         if (null == path2) {
             sensorGroupBuilder2.setTelemetrySensorPaths(null);
         } else {
             TelemetrySensorPathsBuilder sensorPathsBuilder2 = new TelemetrySensorPathsBuilder();
-            sensorPathsBuilder2.setKey(new TelemetrySensorPathsKey(path2));
+            sensorPathsBuilder2.withKey(new TelemetrySensorPathsKey(path2));
             sensorPathsBuilder2.setTelemetrySensorPath(path2);
             sensorPathsBuilder2.setSensorExcludeFilter(filter2);
             List<TelemetrySensorPaths> pathsList2 = new ArrayList<>();
@@ -475,10 +475,10 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         final InstanceIdentifier<TelemetrySensorGroup> sensorGroupPath = InstanceIdentifier.create(Telemetry.class)
                 .child(TelemetrySensorGroup.class, new TelemetrySensorGroupKey(sensor));
         TelemetrySensorGroupBuilder builder = new TelemetrySensorGroupBuilder();
-        builder.setKey(new TelemetrySensorGroupKey(sensor));
+        builder.withKey(new TelemetrySensorGroupKey(sensor));
         builder.setTelemetrySensorGroupId(sensor);
         TelemetrySensorPathsBuilder pathsBuilder = new TelemetrySensorPathsBuilder();
-        pathsBuilder.setKey(new TelemetrySensorPathsKey(path));
+        pathsBuilder.withKey(new TelemetrySensorPathsKey(path));
         pathsBuilder.setTelemetrySensorPath(path);
         pathsBuilder.setSensorExcludeFilter(filter);
         List<TelemetrySensorPaths> list = new ArrayList<>();
@@ -498,7 +498,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .delete.telemetry.sensor.input.TelemetrySensorGroupBuilder sensorGroupBuilder = new org.opendaylight
                 .yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.telemetry
                 .sensor.input.TelemetrySensorGroupBuilder();
-        sensorGroupBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang
+        sensorGroupBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang
                 .configurator.api.rev171120.delete.telemetry.sensor.input.TelemetrySensorGroupKey(sensorId));
         sensorGroupBuilder.setSensorGroupId(sensorId);
         List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120
@@ -511,7 +511,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
 
     private AddTelemetryDestinationInput constructAddTelemetryDestinationInput(String desId, String ip, Integer port) {
         TelemetryDestinationGroupBuilder groupBuilder = new TelemetryDestinationGroupBuilder();
-        groupBuilder.setKey(new TelemetryDestinationGroupKey(desId));
+        groupBuilder.withKey(new TelemetryDestinationGroupKey(desId));
         groupBuilder.setDestinationGroupId(desId);
         DestinationProfileBuilder profileBuilder = new DestinationProfileBuilder();
         List<DestinationProfile> profileList = new ArrayList<>();
@@ -535,10 +535,10 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         final InstanceIdentifier<TelemetryDestinationGroup> desGroupPath = InstanceIdentifier.create(Telemetry.class)
                 .child(TelemetryDestinationGroup.class, new TelemetryDestinationGroupKey(desId));
         TelemetryDestinationGroupBuilder builder = new TelemetryDestinationGroupBuilder();
-        builder.setKey(new TelemetryDestinationGroupKey(desId));
+        builder.withKey(new TelemetryDestinationGroupKey(desId));
         builder.setDestinationGroupId(desId);
         DestinationProfileBuilder profileBuilder = new DestinationProfileBuilder();
-        profileBuilder.setKey(new DestinationProfileKey(new Ipv4Address(ip), port));
+        profileBuilder.withKey(new DestinationProfileKey(new Ipv4Address(ip), port));
         profileBuilder.setDestinationAddress(new Ipv4Address(ip));
         profileBuilder.setDestinationPort(port);
         List<DestinationProfile> list = new ArrayList<>();
@@ -558,7 +558,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .telemetry.destination.input.TelemetryDestinationGroupBuilder groupBuilder= new org.opendaylight.yang
                 .gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.telemetry
                 .destination.input.TelemetryDestinationGroupBuilder();
-        groupBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
+        groupBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
                 .api.rev171120.delete.telemetry.destination.input.TelemetryDestinationGroupKey(desId));
         groupBuilder.setDestinationGroupId(desId);
 
@@ -574,20 +574,20 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                                                                                         String address, String sensorId,
                                                                                         String desId, BigInteger sample) {
         TelemetryNodeBuilder nodeBuilder = new TelemetryNodeBuilder();
-        nodeBuilder.setKey(new TelemetryNodeKey(nodeId));
+        nodeBuilder.withKey(new TelemetryNodeKey(nodeId));
         nodeBuilder.setNodeId(nodeId);
         if (null == subId) {
             nodeBuilder.setTelemetrySubscription(null);
         } else {
             TelemetrySubscriptionBuilder subscriptionBuilder = new TelemetrySubscriptionBuilder();
-            subscriptionBuilder.setKey(new TelemetrySubscriptionKey(subId));
+            subscriptionBuilder.withKey(new TelemetrySubscriptionKey(subId));
             subscriptionBuilder.setSubscriptionName(subId);
             subscriptionBuilder.setLocalSourceAddress(new Ipv4Address(address));
             if (null == sensorId) {
                 subscriptionBuilder.setTelemetrySensor(null);
             } else {
                 TelemetrySensorBuilder sensorBuilder = new TelemetrySensorBuilder();
-                sensorBuilder.setKey(new TelemetrySensorKey(sensorId));
+                sensorBuilder.withKey(new TelemetrySensorKey(sensorId));
                 sensorBuilder.setSensorGroupId(sensorId);
                 sensorBuilder.setSampleInterval(sample);
                 List<TelemetrySensor> sensorList = new ArrayList<>();
@@ -598,7 +598,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 subscriptionBuilder.setTelemetryDestination(null);
             } else {
                 TelemetryDestinationBuilder destinationBuilder = new TelemetryDestinationBuilder();
-                destinationBuilder.setKey(new TelemetryDestinationKey(desId));
+                destinationBuilder.withKey(new TelemetryDestinationKey(desId));
                 destinationBuilder.setDestinationGroupId(desId);
                 List<TelemetryDestination> destinationList = new ArrayList<>();
                 destinationList.add(destinationBuilder.build());
@@ -623,11 +623,11 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .child(TelemetryNode.class, new TelemetryNodeKey(nodeId)).child(TelemetrySubscription.class,
                         new TelemetrySubscriptionKey(subId));
         TelemetrySubscriptionBuilder builder = new TelemetrySubscriptionBuilder();
-        builder.setKey(new TelemetrySubscriptionKey(subId));
+        builder.withKey(new TelemetrySubscriptionKey(subId));
         builder.setSubscriptionName(subId);
         builder.setLocalSourceAddress(new Ipv4Address(ip));
         TelemetrySensorBuilder sensorBuilder = new TelemetrySensorBuilder();
-        sensorBuilder.setKey(new TelemetrySensorKey(sensorId));
+        sensorBuilder.withKey(new TelemetrySensorKey(sensorId));
         sensorBuilder.setSensorGroupId(sensorId);
         sensorBuilder.setSampleInterval(sample);
         List<TelemetrySensor> sensorList = new ArrayList<>();
@@ -635,7 +635,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         builder.setTelemetrySensor(sensorList);
 
         TelemetryDestinationBuilder destinationBuilder = new TelemetryDestinationBuilder();
-        destinationBuilder.setKey(new TelemetryDestinationKey(desId));
+        destinationBuilder.withKey(new TelemetryDestinationKey(desId));
         destinationBuilder.setDestinationGroupId(desId);
         List<TelemetryDestination> destinationList = new ArrayList<>();
         destinationList.add(destinationBuilder.build());
@@ -654,14 +654,14 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .node.telemetry.subscription.input.TelemetryNodeBuilder nodeBuilder = new org.opendaylight.yang.gen
                 .v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node.telemetry
                 .subscription.input.TelemetryNodeBuilder();
-        nodeBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
+        nodeBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
                 .api.rev171120.delete.node.telemetry.subscription.input.TelemetryNodeKey(nodeId));
         nodeBuilder.setNodeId(nodeId);
         if (null == subId) {
             nodeBuilder.setTelemetryNodeSubscription(null);
         } else {
             TelemetryNodeSubscriptionBuilder subscriptionBuilder = new TelemetryNodeSubscriptionBuilder();
-            subscriptionBuilder.setKey(new TelemetryNodeSubscriptionKey(subId));
+            subscriptionBuilder.withKey(new TelemetryNodeSubscriptionKey(subId));
             subscriptionBuilder.setSubscriptionName(subId);
             List<TelemetryNodeSubscription> subscriptionList = new ArrayList<>();
             subscriptionList.add(subscriptionBuilder.build());
@@ -681,7 +681,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .node.telemetry.subscription.sensor.input.TelemetryNodeBuilder nodeBuilder = new org.opendaylight.yang
                 .gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node.telemetry
                 .subscription.sensor.input.TelemetryNodeBuilder();
-        nodeBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
+        nodeBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
                 .api.rev171120.delete.node.telemetry.subscription.sensor.input.TelemetryNodeKey(nodeId));
         nodeBuilder.setNodeId(nodeId);
         if (null == subId) {
@@ -692,7 +692,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                     subscriptionBuilder = new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns
                     .yang.configurator.api.rev171120.delete.node.telemetry.subscription.sensor.input.telemetry.node
                     .TelemetryNodeSubscriptionBuilder();
-            subscriptionBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns
+            subscriptionBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns
                     .yang.configurator.api.rev171120.delete.node.telemetry.subscription.sensor.input.telemetry
                     .node.TelemetryNodeSubscriptionKey(subId));
             subscriptionBuilder.setSubscriptionName(subId);
@@ -700,7 +700,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 subscriptionBuilder.setTelemetryNodeSubscriptionSensor(null);
             } else {
                 TelemetryNodeSubscriptionSensorBuilder sensorBuilder = new TelemetryNodeSubscriptionSensorBuilder();
-                sensorBuilder.setKey(new TelemetryNodeSubscriptionSensorKey(sensorId));
+                sensorBuilder.withKey(new TelemetryNodeSubscriptionSensorKey(sensorId));
                 sensorBuilder.setSensorGroupId(sensorId);
                 List<TelemetryNodeSubscriptionSensor> sensorList = new ArrayList<>();
                 sensorList.add(sensorBuilder.build());
@@ -726,7 +726,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 .node.telemetry.subscription.destination.input.TelemetryNodeBuilder nodeBuilder = new org.opendaylight
                 .yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node
                 .telemetry.subscription.destination.input.TelemetryNodeBuilder();
-        nodeBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
+        nodeBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator
                 .api.rev171120.delete.node.telemetry.subscription.destination.input.TelemetryNodeKey(nodeId));
         nodeBuilder.setNodeId(nodeId);
         if (null == subId) {
@@ -737,7 +737,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                     subscriptionBuilder = new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang
                     .configurator.api.rev171120.delete.node.telemetry.subscription.destination.input.telemetry.node
                     .TelemetryNodeSubscriptionBuilder();
-            subscriptionBuilder.setKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang
+            subscriptionBuilder.withKey(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang
                     .configurator.api.rev171120.delete.node.telemetry.subscription.destination.input.telemetry.node
                     .TelemetryNodeSubscriptionKey(subId));
             subscriptionBuilder.setSubscriptionName(subId);
@@ -745,7 +745,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
                 subscriptionBuilder.setTelemetryNodeSubscriptionDestination(null);
             } else {
                 TelemetryNodeSubscriptionDestinationBuilder destinationBuilder = new TelemetryNodeSubscriptionDestinationBuilder();
-                destinationBuilder.setKey(new TelemetryNodeSubscriptionDestinationKey(desId));
+                destinationBuilder.withKey(new TelemetryNodeSubscriptionDestinationKey(desId));
                 destinationBuilder.setDestinationGroupId(desId);
                 List<TelemetryNodeSubscriptionDestination> destinationList = new ArrayList<>();
                 destinationList.add(destinationBuilder.build());

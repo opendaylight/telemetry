@@ -246,7 +246,7 @@ public class DataProcessor {
         List<SensorGroup> sensorGroupList = new ArrayList<>();
         for (TelemetrySensorGroup telemetrySensorGroup : list) {
             SensorGroupBuilder builder = new SensorGroupBuilder();
-            builder.setKey(new SensorGroupKey(telemetrySensorGroup.getTelemetrySensorGroupId()));
+            builder.withKey(new SensorGroupKey(telemetrySensorGroup.getTelemetrySensorGroupId()));
             builder.setSensorGroupId(telemetrySensorGroup.getTelemetrySensorGroupId());
             //builder.setConfig(new ConfigBuilder().setSensorGroupId(telemetrySensorGroup.getTelemetrySensorGroupId()));
             builder.setSensorPaths(convertSensorPaths(telemetrySensorGroup.getTelemetrySensorPaths()));
@@ -261,7 +261,7 @@ public class DataProcessor {
         List<SensorPath> sensorPathList = new ArrayList<>();
         for (TelemetrySensorPaths paths : list) {
             SensorPathBuilder sensorPathBuilder = new SensorPathBuilder();
-            sensorPathBuilder.setKey(new SensorPathKey(paths.getTelemetrySensorPath()));
+            sensorPathBuilder.withKey(new SensorPathKey(paths.getTelemetrySensorPath()));
             sensorPathBuilder.setPath(paths.getTelemetrySensorPath());
 //            sensorPathBuilder.setConfig(new ConfigBuilder().setPath(paths.getTelemetrySensorPath())
 //                    .setExcludeFilter(paths.getSensorExcludeFilter()).build());
@@ -276,7 +276,7 @@ public class DataProcessor {
         List<DestinationGroup> destinationGroupList = new ArrayList<>();
         for (TelemetryDestinationGroup telemetryDestinationGroup : list) {
             DestinationGroupBuilder builder = new DestinationGroupBuilder();
-            builder.setKey(new DestinationGroupKey(telemetryDestinationGroup.getDestinationGroupId()));
+            builder.withKey(new DestinationGroupKey(telemetryDestinationGroup.getDestinationGroupId()));
             builder.setGroupId(telemetryDestinationGroup.getDestinationGroupId());
             //builder.setConfig();
             builder.setDestinations(convertDestinations(telemetryDestinationGroup.getDestinationProfile()));
@@ -291,7 +291,7 @@ public class DataProcessor {
         List<Destination> destinationList = new ArrayList<>();
         for (DestinationProfile destinationProfile : list) {
             DestinationBuilder destinationBuilder = new DestinationBuilder();
-            destinationBuilder.setKey(new DestinationKey(destinationProfile.getDestinationAddress(), destinationProfile.getDestinationPort()));
+            destinationBuilder.withKey(new DestinationKey(destinationProfile.getDestinationAddress(), destinationProfile.getDestinationPort()));
             destinationBuilder.setDestinationAddress(destinationProfile.getDestinationAddress());
             destinationBuilder.setDestinationPort(destinationProfile.getDestinationPort());
             destinationList.add(destinationBuilder.build());
@@ -305,7 +305,7 @@ public class DataProcessor {
 
         List<Subscription> subscriptionList = new ArrayList<>();
         SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder();
-        subscriptionBuilder.setKey(new SubscriptionKey(subscription.getSubscriptionName()));
+        subscriptionBuilder.withKey(new SubscriptionKey(subscription.getSubscriptionName()));
         subscriptionBuilder.setSubscriptionName(subscription.getSubscriptionName());
         subscriptionBuilder.setConfig(convertLeafParamsOfSubscription(subscription.getSubscriptionName(),
                 subscription.getLocalSourceAddress(), subscription.getOriginatedQosMarking(),
@@ -364,7 +364,7 @@ public class DataProcessor {
         List<SensorProfile> sensorProfileList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             SensorProfileBuilder sensorProfileBuilder = new SensorProfileBuilder();
-            sensorProfileBuilder.setKey(new SensorProfileKey(list.get(i).getSensorGroupId()));
+            sensorProfileBuilder.withKey(new SensorProfileKey(list.get(i).getSensorGroupId()));
             sensorProfileBuilder.setSensorGroup(list.get(i).getSensorGroupId());
             sensorProfileBuilder.setConfig(convertSensorProfilesConfig(list.get(i).getSensorGroupId(),
                     list.get(i).getSampleInterval(), list.get(i).getHeartbeatInterval(),
@@ -418,7 +418,7 @@ public class DataProcessor {
                     destinationGroupBuilder = new org.opendaylight.yang.gen.v1.http.openconfig.net.yang
                     .telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent
                     .subscription.destination.groups.DestinationGroupBuilder();
-            destinationGroupBuilder.setKey(new org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry
+            destinationGroupBuilder.withKey(new org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry
                     .rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.destination
                     .groups.DestinationGroupKey(list.get(i).getDestinationGroupId()));
             destinationGroupBuilder.setGroupId(list.get(i).getDestinationGroupId());
