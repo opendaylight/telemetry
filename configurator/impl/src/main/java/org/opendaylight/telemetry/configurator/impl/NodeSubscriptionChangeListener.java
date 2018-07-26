@@ -7,7 +7,15 @@
  */
 package org.opendaylight.telemetry.configurator.impl;
 
-import org.opendaylight.controller.md.sal.binding.api.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
@@ -19,10 +27,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yan
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 public class NodeSubscriptionChangeListener implements DataTreeChangeListener<TelemetrySubscription> {
     private static final Logger LOG = LoggerFactory.getLogger(NodeSubscriptionChangeListener.class);
 
@@ -30,14 +34,17 @@ public class NodeSubscriptionChangeListener implements DataTreeChangeListener<Te
     private ConfigurationWriter configurationWriter;
     private DataProcessor dataProcessor;
 
-    public NodeSubscriptionChangeListener(DataBroker dataBroker, ConfigurationWriter configurationWriter, DataProcessor dataProcessor) {
+    public NodeSubscriptionChangeListener(DataBroker dataBroker, ConfigurationWriter configurationWriter,
+                                          DataProcessor dataProcessor) {
         this.dataBroker = dataBroker;
         this.configurationWriter = configurationWriter;
         this.dataProcessor = dataProcessor;
     }
 
     public void init() {
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<TelemetrySubscription>(LogicalDatastoreType.CONFIGURATION, IidConstants.TELEMETRY_IID.child(TelemetryNode.class).child(TelemetrySubscription.class)), this);
+        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<TelemetrySubscription>(
+                LogicalDatastoreType.CONFIGURATION, IidConstants.TELEMETRY_IID.child(TelemetryNode.class)
+                .child(TelemetrySubscription.class)), this);
         LOG.info("Begin to Listen the node subscription changes");
     }
 
@@ -48,32 +55,41 @@ public class NodeSubscriptionChangeListener implements DataTreeChangeListener<Te
             switch (rootNode.getModificationType()) {
                 case WRITE:
                     if (null == rootNode.getDataBefore()) {
-                        LOG.info("The subscription of {} was added, before:{}, after:{}", change.getRootPath().getRootIdentifier()
-                                        .firstIdentifierOf(TelemetrySubscription.class).firstKeyOf(TelemetryNode.class).getNodeId(),
+                        LOG.info("The subscription of {} was added, before:{}, after:{}",
+                                change.getRootPath().getRootIdentifier()
+                                        .firstIdentifierOf(TelemetrySubscription.class)
+                                        .firstKeyOf(TelemetryNode.class).getNodeId(),
                             rootNode.getDataBefore(), rootNode.getDataAfter());
                         processAddSubscription(change.getRootPath().getRootIdentifier()
                                 .firstIdentifierOf(TelemetrySubscription.class)
                                 .firstKeyOf(TelemetryNode.class).getNodeId(), rootNode.getDataAfter());
                     } else {
-                        LOG.info("The subscription of {} was modified, before:{}, after:{}", change.getRootPath().getRootIdentifier()
-                                        .firstIdentifierOf(TelemetrySubscription.class).firstKeyOf(TelemetryNode.class).getNodeId(),
+                        LOG.info("The subscription of {} was modified, before:{}, after:{}",
+                                change.getRootPath().getRootIdentifier()
+                                        .firstIdentifierOf(TelemetrySubscription.class)
+                                        .firstKeyOf(TelemetryNode.class).getNodeId(),
                                 rootNode.getDataBefore(), rootNode.getDataAfter());
                         processModifySubscription(change.getRootPath().getRootIdentifier()
                                 .firstIdentifierOf(TelemetrySubscription.class)
-                                .firstKeyOf(TelemetryNode.class).getNodeId(), rootNode.getDataBefore(), rootNode.getDataAfter());
+                                .firstKeyOf(TelemetryNode.class).getNodeId(),
+                                rootNode.getDataBefore(), rootNode.getDataAfter());
                     }
                     break;
                 case SUBTREE_MODIFIED:
-                    LOG.info("The subscription of {} was modified, before:{}, after:{}", change.getRootPath().getRootIdentifier()
-                                    .firstIdentifierOf(TelemetrySubscription.class).firstKeyOf(TelemetryNode.class).getNodeId(),
+                    LOG.info("The subscription of {} was modified, before:{}, after:{}",
+                            change.getRootPath().getRootIdentifier().firstIdentifierOf(TelemetrySubscription.class)
+                                    .firstKeyOf(TelemetryNode.class).getNodeId(),
                             rootNode.getDataBefore(), rootNode.getDataAfter());
                     processModifySubscription(change.getRootPath().getRootIdentifier()
                             .firstIdentifierOf(TelemetrySubscription.class)
-                            .firstKeyOf(TelemetryNode.class).getNodeId(), rootNode.getDataBefore(), rootNode.getDataAfter());
+                            .firstKeyOf(TelemetryNode.class).getNodeId(),
+                            rootNode.getDataBefore(), rootNode.getDataAfter());
                     break;
                 case DELETE:
-                    LOG.info("The subscription of {} was deleted, before:{}, after:{}", change.getRootPath().getRootIdentifier()
-                                    .firstIdentifierOf(TelemetrySubscription.class).firstKeyOf(TelemetryNode.class).getNodeId(),
+                    LOG.info("The subscription of {} was deleted, before:{}, after:{}",
+                            change.getRootPath().getRootIdentifier()
+                                    .firstIdentifierOf(TelemetrySubscription.class)
+                                    .firstKeyOf(TelemetryNode.class).getNodeId(),
                             rootNode.getDataBefore(), rootNode.getDataAfter());
                     processDelSubscription(change.getRootPath().getRootIdentifier()
                             .firstIdentifierOf(TelemetrySubscription.class).firstKeyOf(TelemetryNode.class).getNodeId(),
@@ -102,15 +118,15 @@ public class NodeSubscriptionChangeListener implements DataTreeChangeListener<Te
         }
 
         if (checkDelDestination(subscriptionBefore, subscriptionAfter)) {
-            processDelDestination(nodeId, subscriptionBefore.getSubscriptionName(), subscriptionBefore.getTelemetryDestination(),
-                    subscriptionAfter.getTelemetryDestination());
+            processDelDestination(nodeId, subscriptionBefore.getSubscriptionName(),
+                    subscriptionBefore.getTelemetryDestination(), subscriptionAfter.getTelemetryDestination());
             return;
         }
 
         TelemetrySystem telemetrySystemModified = changeNorthDataToSouth(subscriptionAfter);
         LOG.info("telemetrySystemModified is {}", telemetrySystemModified);
-        configurationWriter.writeTelemetryConfig(ConfigurationType.MODIFY, nodeId, subscriptionBefore.getSubscriptionName(),
-                telemetrySystemModified);
+        configurationWriter.writeTelemetryConfig(ConfigurationType.MODIFY, nodeId,
+                subscriptionBefore.getSubscriptionName(), telemetrySystemModified);
     }
 
     private void processDelSubscription(String nodeId, String subscriptionName) {
@@ -119,7 +135,8 @@ public class NodeSubscriptionChangeListener implements DataTreeChangeListener<Te
 
     private TelemetrySystem changeNorthDataToSouth(TelemetrySubscription subscription) {
         List<TelemetrySensorGroup> sensorGroupList = dataProcessor.getSensorGroupDetailById(subscription);
-        List<TelemetryDestinationGroup> destinationGroupList = dataProcessor.getDestinationGroupDetailById(subscription);
+        List<TelemetryDestinationGroup> destinationGroupList = dataProcessor
+                .getDestinationGroupDetailById(subscription);
         return dataProcessor.convertDataToSouth(sensorGroupList, destinationGroupList, subscription);
     }
 
@@ -182,7 +199,8 @@ public class NodeSubscriptionChangeListener implements DataTreeChangeListener<Te
         }
 
         for (TelemetryDestination destination : destinationChangeList) {
-            configurationWriter.delSubscriptionDestination(nodeId, subscriptionName, destination.getDestinationGroupId());
+            configurationWriter.delSubscriptionDestination(nodeId, subscriptionName,
+                    destination.getDestinationGroupId());
         }
         return;
     }

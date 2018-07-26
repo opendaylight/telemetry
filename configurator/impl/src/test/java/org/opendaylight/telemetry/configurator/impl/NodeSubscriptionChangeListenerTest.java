@@ -98,7 +98,8 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
         addNodeToDatastore("1", null);
     }
 
-    private List<TelemetrySubscription> constructSubList(String subId, String ip, String sensorId, String sam, String desId) {
+    private List<TelemetrySubscription> constructSubList(String subId, String ip, String sensorId, String sam,
+                                                         String desId) {
         List<TelemetrySubscription> list = new ArrayList<>();
         list.add(constructNodeSub(subId, ip, sensorId, sam, desId));
         return list;

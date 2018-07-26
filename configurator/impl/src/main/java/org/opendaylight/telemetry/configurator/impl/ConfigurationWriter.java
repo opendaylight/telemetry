@@ -70,7 +70,7 @@ public class ConfigurationWriter {
     public CheckedFuture<Void, TransactionCommitFailedException> writeTelemetryConfig(
             ConfigurationType type, String nodeId, String subscriptionName, TelemetrySystem data) {
         if (type == ConfigurationType.DELETE) {
-        	  LOG.info("access delete write");
+            LOG.info("access delete write");
             return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
                     .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName)), null);
         }
@@ -78,29 +78,33 @@ public class ConfigurationWriter {
         return write(OperateType.MERGE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID, data);
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> delSubscription(String nodeId, String subscriptionName) {
+    public CheckedFuture<Void, TransactionCommitFailedException> delSubscription(String nodeId,
+                                                                                 String subscriptionName) {
         return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
                 .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName)), null);
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionSensor(String nodeId, String subscriptionName,
+    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionSensor(String nodeId,
+                                                                                       String subscriptionName,
                                                                                        String sensorId) {
         return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
                 .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName))
                 .child(SensorProfiles.class).child(SensorProfile.class, new SensorProfileKey(sensorId)), null);
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionDestination(String nodeId, String subscriptionName,
+    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionDestination(String nodeId,
+                                                                                            String subscriptionName,
                                                                                             String destinationId) {
         return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
                 .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName))
-                .child(DestinationGroups.class).child(DestinationGroup.class, new DestinationGroupKey(destinationId)), null);
+                .child(DestinationGroups.class).child(DestinationGroup.class, new DestinationGroupKey(destinationId)),
+                null);
     }
 
     private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> write(
             OperateType type, String nodeId, InstanceIdentifier<T> path, T data) {
         LOG.info("already entered write");
-        final DataBroker dataBroker = getDataBroker(nodeId, mountPointService);
+        final DataBroker dataBroker = getDataBroker(nodeId);
         if (null == dataBroker) {
             LOG.info("write process data broker is null");
             return null;
@@ -109,8 +113,8 @@ public class ConfigurationWriter {
         return operate(type, dataBroker, RETRY_WRITE_MAX, path, data);
     }
 
-    private DataBroker getDataBroker(String nodeId, MountPointService mountPointService) {
-        MountPoint mountPoint = getMountPoint(nodeId, mountPointService);
+    private DataBroker getDataBroker(String nodeId) {
+        MountPoint mountPoint = getMountPoint(nodeId);
         if (null == mountPoint) {
             LOG.info("mount point is null");
             return null;
@@ -123,7 +127,7 @@ public class ConfigurationWriter {
         return nodeBroker.get();
     }
 
-    private MountPoint getMountPoint(String nodeId, MountPointService mountPointService) {
+    private MountPoint getMountPoint(String nodeId) {
         if (null == mountPointService) {
             LOG.info("mount point service is null");
             return null;
@@ -200,7 +204,7 @@ public class ConfigurationWriter {
     }
 
     public void query(String nodeId) {
-        DataBroker dataBroker = getDataBroker(nodeId, mountPointService);
+        DataBroker dataBroker = getDataBroker(nodeId);
         if (null != readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID)) {
             LOG.info("Data is {}", readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID));
         } else {

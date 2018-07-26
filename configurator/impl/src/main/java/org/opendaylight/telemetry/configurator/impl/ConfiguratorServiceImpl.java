@@ -7,24 +7,57 @@
  */
 package org.opendaylight.telemetry.configurator.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.List;
 
-import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPaths;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.*;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.*;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetrySensorInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetrySensorOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetrySensorOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.ConfigureNodeTelemetrySubscriptionInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.ConfigureNodeTelemetrySubscriptionOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.ConfigureNodeTelemetrySubscriptionOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionDestinationInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionDestinationOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionDestinationOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionSensorInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionSensorOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteNodeTelemetrySubscriptionSensorOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteTelemetryDestinationInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteTelemetryDestinationOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteTelemetryDestinationOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteTelemetrySensorInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteTelemetrySensorOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.DeleteTelemetrySensorOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryDeviceDataInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryDeviceDataOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryDeviceDataOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryNodeTelemetrySubscriptionInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryNodeTelemetrySubscriptionOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryNodeTelemetrySubscriptionOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryTelemetryDestinationInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryTelemetryDestinationOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryTelemetryDestinationOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryTelemetrySensorInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryTelemetrySensorOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.QueryTelemetrySensorOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.TelemetryConfiguratorApiService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult.Result;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.TelemetryDestinationGroup;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.telemetry.destination.group.DestinationProfile;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.node.subscription.TelemetryNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.TelemetrySubscription;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetryDestination;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.subscription.specification.telemetry.subscription.TelemetrySensor;
+
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.configure.result.ConfigureResult.Result;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -55,10 +88,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private static final String NODE_SUBSCR_SENSOR_NULL = "There is no sensor provided in node subscription!";
     private static final String NODE_SUBSCR_DES_NULL = "There is no destination provided in node subscription!";
     private static final String SUBSCR_PARAS_NULL = " exist Param is null! ";
-    private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in" +
-            " sensor is null or exist sensor not configured!";
-    private static final String SUBSCR_DES_ABNORMAL = "Destination empty in node subscription" +
-            " or exist destination not configured!";
+    private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in"
+            + " sensor is null or exist sensor not configured!";
+    private static final String SUBSCR_DES_ABNORMAL = "Destination empty in node subscription"
+            + " or exist destination not configured!";
 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor, ConfigurationWriter configurationWriter) {
         this.dataProcessor = dataProcessor;
@@ -81,7 +114,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
         for (TelemetrySensorGroup sensorGroup : sensorGroupList) {
             if (null == sensorGroup.getTelemetrySensorPaths() || sensorGroup.getTelemetrySensorPaths().isEmpty()) {
-                builder.setConfigureResult(getConfigResult(false, sensorGroup.getTelemetrySensorGroupId() + SENSOR_PATHS));
+                builder.setConfigureResult(getConfigResult(false, sensorGroup.getTelemetrySensorGroupId()
+                        + SENSOR_PATHS));
                 return RpcResultBuilder.success(builder.build()).buildFuture();
             }
         }
@@ -99,12 +133,14 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<QueryTelemetrySensorOutput>> queryTelemetrySensor(QueryTelemetrySensorInput input) {
+    public ListenableFuture<RpcResult<QueryTelemetrySensorOutput>> queryTelemetrySensor(
+            QueryTelemetrySensorInput input) {
         if (null == input) {
             return rpcErr(INPUT_NULL);
         }
 
-        List<TelemetrySensorGroup> allSensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetrySensorGroup> allSensorGroupList = dataProcessor
+                .getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
         if (null == allSensorGroupList || allSensorGroupList.isEmpty()) {
             return rpcErr(NO_SENSOR_GROUP);
         }
@@ -114,7 +150,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<DeleteTelemetrySensorOutput>> deleteTelemetrySensor(DeleteTelemetrySensorInput input) {
+    public ListenableFuture<RpcResult<DeleteTelemetrySensorOutput>> deleteTelemetrySensor(
+            DeleteTelemetrySensorInput input) {
         //check input
         DeleteTelemetrySensorOutputBuilder builder = new DeleteTelemetrySensorOutputBuilder();
         if (null == input) {
@@ -135,7 +172,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<AddTelemetryDestinationOutput>> addTelemetryDestination(AddTelemetryDestinationInput input) {
+    public ListenableFuture<RpcResult<AddTelemetryDestinationOutput>> addTelemetryDestination(
+            AddTelemetryDestinationInput input) {
         //check input
         AddTelemetryDestinationOutputBuilder builder = new AddTelemetryDestinationOutputBuilder();
         if (null == input) {
@@ -148,7 +186,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
             return RpcResultBuilder.success(builder.build()).buildFuture();
         }
         for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
-            if (null == destinationGroup.getDestinationProfile() || destinationGroup.getDestinationProfile().isEmpty()) {
+            if (null == destinationGroup.getDestinationProfile()
+                    || destinationGroup.getDestinationProfile().isEmpty()) {
                 builder.setConfigureResult(getConfigResult(false, destinationGroup.getDestinationGroupId() + DES_FILE));
                 return RpcResultBuilder.success(builder.build()).buildFuture();
             }
@@ -167,13 +206,15 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<QueryTelemetryDestinationOutput>> queryTelemetryDestination(QueryTelemetryDestinationInput input) {
+    public ListenableFuture<RpcResult<QueryTelemetryDestinationOutput>> queryTelemetryDestination(
+            QueryTelemetryDestinationInput input) {
         //check input
         if (null == input) {
             return rpcErr(INPUT_NULL);
         }
 
-        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor.getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor
+                .getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
         if (null == allDestinationGroupList || allDestinationGroupList.isEmpty()) {
             return rpcErr(NO_DES_GROUP);
         }
@@ -183,7 +224,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<DeleteTelemetryDestinationOutput>> deleteTelemetryDestination(DeleteTelemetryDestinationInput input) {
+    public ListenableFuture<RpcResult<DeleteTelemetryDestinationOutput>> deleteTelemetryDestination(
+            DeleteTelemetryDestinationInput input) {
         //check input
         DeleteTelemetryDestinationOutputBuilder builder = new DeleteTelemetryDestinationOutputBuilder();
         if (null == input) {
@@ -196,7 +238,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         }
 
         for (int i = 0; i < input.getTelemetryDestinationGroup().size(); i++) {
-            dataProcessor.deleteDestinationGroupFromDataStore(input.getTelemetryDestinationGroup().get(i).getDestinationGroupId());
+            dataProcessor.deleteDestinationGroupFromDataStore(input.getTelemetryDestinationGroup().get(i)
+                    .getDestinationGroupId());
         }
 
         builder.setConfigureResult(getConfigResult(true, ""));
@@ -204,7 +247,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> configureNodeTelemetrySubscription(ConfigureNodeTelemetrySubscriptionInput input) {
+    public ListenableFuture<RpcResult<ConfigureNodeTelemetrySubscriptionOutput>> configureNodeTelemetrySubscription(
+            ConfigureNodeTelemetrySubscriptionInput input) {
         //check input
         ConfigureNodeTelemetrySubscriptionOutputBuilder builder = new ConfigureNodeTelemetrySubscriptionOutputBuilder();
         if (null == input) {
@@ -219,14 +263,16 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         }
 
         for (TelemetryNode telemetryNodeGroup : nodeGroupList) {
-            if (null == telemetryNodeGroup.getTelemetrySubscription() || telemetryNodeGroup.getTelemetrySubscription().isEmpty()) {
+            if (null == telemetryNodeGroup.getTelemetrySubscription()
+                    || telemetryNodeGroup.getTelemetrySubscription().isEmpty()) {
                 builder.setConfigureResult(getConfigResult(false, telemetryNodeGroup.getNodeId() + SUBSCR_NULL));
                 return RpcResultBuilder.success(builder.build()).buildFuture();
             }
 
             for (TelemetrySubscription subscription : telemetryNodeGroup.getTelemetrySubscription()) {
                 if (!checkParamsInSubscriptionExist(subscription)) {
-                    builder.setConfigureResult(getConfigResult(false, subscription.getSubscriptionName() + SUBSCR_PARAS_NULL + telemetryNodeGroup.getNodeId()));
+                    builder.setConfigureResult(getConfigResult(false, subscription.getSubscriptionName()
+                            + SUBSCR_PARAS_NULL + telemetryNodeGroup.getNodeId()));
                     return RpcResultBuilder.success(builder.build()).buildFuture();
                 }
             }
@@ -248,13 +294,15 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelemetrySubscription(QueryNodeTelemetrySubscriptionInput input) {
+    public ListenableFuture<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelemetrySubscription(
+            QueryNodeTelemetrySubscriptionInput input) {
         //check input
         if (null == input) {
             return rpcErr(INPUT_NULL);
         }
 
-        List<TelemetryNode> allNodeSubscriptionList = dataProcessor.getNodeSubscriptionFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetryNode> allNodeSubscriptionList = dataProcessor
+                .getNodeSubscriptionFromDataStore(IidConstants.TELEMETRY_IID);
         if (null == allNodeSubscriptionList || allNodeSubscriptionList.isEmpty()) {
             return rpcErr(NO_SUBSCR);
         }
@@ -264,7 +312,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionOutput>> deleteNodeTelemetrySubscription(DeleteNodeTelemetrySubscriptionInput input) {
+    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionOutput>> deleteNodeTelemetrySubscription(
+            DeleteNodeTelemetrySubscriptionInput input) {
         //check input
         DeleteNodeTelemetrySubscriptionOutputBuilder builder = new DeleteNodeTelemetrySubscriptionOutputBuilder();
         if (null == input) {
@@ -280,7 +329,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         for (int i = 0; i < input.getTelemetryNode().size(); i++) {
             if (null == input.getTelemetryNode().get(i).getTelemetryNodeSubscription()
                     || input.getTelemetryNode().get(i).getTelemetryNodeSubscription().isEmpty()) {
-                builder.setConfigureResult(getConfigResult(false, input.getTelemetryNode().get(i).getNodeId() + SUBSCR_NULL));
+                builder.setConfigureResult(getConfigResult(false, input.getTelemetryNode().get(i)
+                        .getNodeId() + SUBSCR_NULL));
                 return RpcResultBuilder.success(builder.build()).buildFuture();
             }
         }
@@ -299,8 +349,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>> deleteNodeTelemetrySubscriptionSensor(DeleteNodeTelemetrySubscriptionSensorInput input) {
-        DeleteNodeTelemetrySubscriptionSensorOutputBuilder builder = new DeleteNodeTelemetrySubscriptionSensorOutputBuilder();
+    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>>
+        deleteNodeTelemetrySubscriptionSensor(DeleteNodeTelemetrySubscriptionSensorInput input) {
+        DeleteNodeTelemetrySubscriptionSensorOutputBuilder builder = new
+                DeleteNodeTelemetrySubscriptionSensorOutputBuilder();
         if (null == input) {
             builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
             return RpcResultBuilder.success(builder.build()).buildFuture();
@@ -341,8 +393,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     @Override
-    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>> deleteNodeTelemetrySubscriptionDestination(DeleteNodeTelemetrySubscriptionDestinationInput input) {
-        DeleteNodeTelemetrySubscriptionDestinationOutputBuilder builder = new DeleteNodeTelemetrySubscriptionDestinationOutputBuilder();
+    public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionDestinationOutput>>
+        deleteNodeTelemetrySubscriptionDestination(DeleteNodeTelemetrySubscriptionDestinationInput input) {
+        DeleteNodeTelemetrySubscriptionDestinationOutputBuilder builder = new
+                DeleteNodeTelemetrySubscriptionDestinationOutputBuilder();
         if (null == input) {
             builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
             return RpcResultBuilder.success(builder.build()).buildFuture();
@@ -365,10 +419,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
         for (int i = 0; i < input.getTelemetryNode().size(); i++) {
             for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
-                dataProcessor.deleteNodeSubscriptionDestinationFromDataStore(input.getTelemetryNode().get(i).getNodeId(),
-                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
-                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                                .getTelemetryNodeSubscriptionDestination());
+                dataProcessor.deleteNodeSubscriptionDestinationFromDataStore(input.getTelemetryNode().get(i)
+                        .getNodeId(), input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                        .getSubscriptionName(), input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                        .getTelemetryNodeSubscriptionDestination());
                 for (int k = 0; k < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
                         .getTelemetryNodeSubscriptionDestination().size(); k++) {
                     configurationWriter.delSubscriptionDestination(input.getTelemetryNode().get(i).getNodeId(),
@@ -391,7 +445,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     private boolean checkSensorGroupExistedInDataStore(List<TelemetrySensorGroup> sensorGroupList) {
         LOG.info("Get sensor group from data store");
-        List<TelemetrySensorGroup> allSensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetrySensorGroup> allSensorGroupList = dataProcessor
+                .getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
 
         if (null == allSensorGroupList || allSensorGroupList.isEmpty()) {
             return false;
@@ -409,7 +464,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     private boolean checkDesGroupExistedInDataStore(List<TelemetryDestinationGroup> destinationGroupList) {
         LOG.info("Get destination group from data store");
-        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor.getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor
+                .getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
 
         if (null == allDestinationGroupList || allDestinationGroupList.isEmpty()) {
             return false;
@@ -451,7 +507,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     private boolean checkSubscriDesProvidedByConfigSubscriInput(List<TelemetryNode> nodeGroupList) {
         for (TelemetryNode telemetryNodeGroup : nodeGroupList) {
             for (TelemetrySubscription subscription : telemetryNodeGroup.getTelemetrySubscription()) {
-                if ((null != subscription.getTelemetryDestination()) && (!subscription.getTelemetryDestination().isEmpty())) {
+                if ((null != subscription.getTelemetryDestination())
+                        && (!subscription.getTelemetryDestination().isEmpty())) {
                     LOG.info("check");
                     if (!checkDesResult(subscription.getTelemetryDestination())) {
                         return false;
@@ -494,7 +551,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     private boolean checkSensorExit(String sensorId) {
-        List<TelemetrySensorGroup> sensorGroupList = dataProcessor.getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetrySensorGroup> sensorGroupList = dataProcessor
+                .getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID);
         if (null ==  sensorGroupList || sensorGroupList.isEmpty()) {
             return false;
         }
@@ -514,7 +572,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     }
 
     private boolean checkDestinationExit(String destinationId) {
-        List<TelemetryDestinationGroup> destinationGroupList = dataProcessor.getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+        List<TelemetryDestinationGroup> destinationGroupList = dataProcessor
+                .getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
         if (null == destinationGroupList || destinationGroupList.isEmpty()) {
             return false;
         }

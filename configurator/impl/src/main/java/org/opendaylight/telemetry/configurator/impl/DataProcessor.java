@@ -9,6 +9,10 @@ package org.opendaylight.telemetry.configurator.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -19,9 +23,13 @@ import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystemBuilder;
-import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.*;
+
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.DestinationGroups;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.DestinationGroupsBuilder;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.SensorGroups;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.SensorGroupsBuilder;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.Subscriptions;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.SubscriptionsBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.destination.groups.DestinationGroup;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.destination.groups.DestinationGroupBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.destination.groups.DestinationGroupKey;
@@ -42,12 +50,20 @@ import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.Subscription;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.SubscriptionBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.SubscriptionKey;
-import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.*;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.Config;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.SensorProfiles;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.SensorProfilesBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.SensorProfile;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.SensorProfileBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.sensor.profiles.SensorProfileKey;
-import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.*;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.ENCJSONIETF;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.ENCPROTO3;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.ENCXML;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.STREAMGRPC;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.STREAMJSONRPC;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.STREAMSSH;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.STREAMTHRIFTRPC;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.types.rev170824.STREAMWEBSOCKETRPC;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.types.inet.rev170824.Dscp;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.types.inet.rev170824.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.delete.node.telemetry.subscription.destination.input.telemetry.node.telemetry.node.subscription.TelemetryNodeSubscriptionDestination;
@@ -64,10 +80,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DataProcessor {
 
@@ -131,13 +143,15 @@ public class DataProcessor {
 
     public void addSensorGroupToDataStore(List<TelemetrySensorGroup> sensorGroupList) {
         for (TelemetrySensorGroup sensorGroup : sensorGroupList) {
-            operateDataStore(ConfigurationType.ADD, sensorGroup, IidConstants.getSensorGroupPath(sensorGroup.getTelemetrySensorGroupId()));
+            operateDataStore(ConfigurationType.ADD, sensorGroup, IidConstants.getSensorGroupPath(
+                    sensorGroup.getTelemetrySensorGroupId()));
         }
     }
 
     public void addDestinationGroupToDataStore(List<TelemetryDestinationGroup> destinationGroupList) {
         for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
-            operateDataStore(ConfigurationType.ADD, destinationGroup, IidConstants.getDestinationGroupPath(destinationGroup.getDestinationGroupId()));
+            operateDataStore(ConfigurationType.ADD, destinationGroup, IidConstants.getDestinationGroupPath(
+                    destinationGroup.getDestinationGroupId()));
         }
     }
 
@@ -177,8 +191,8 @@ public class DataProcessor {
 
     public void deleteNodeSubscriptionFromDataStore(String nodeId, List<TelemetryNodeSubscription> list) {
         for (int i = 0; i < list.size(); i++) {
-                operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSubscriptionPath(nodeId,
-                        list.get(i).getSubscriptionName()));
+            operateDataStore(ConfigurationType.DELETE, null, IidConstants.getSubscriptionPath(nodeId,
+                    list.get(i).getSubscriptionName()));
         }
     }
 
@@ -202,7 +216,8 @@ public class DataProcessor {
         return sensorDetail(subscription.getTelemetrySensor(), getSensorGroupFromDataStore(IidConstants.TELEMETRY_IID));
     }
 
-    private List<TelemetrySensorGroup> sensorDetail(List<TelemetrySensor> sensorList, List<TelemetrySensorGroup> sensorGroupList) {
+    private List<TelemetrySensorGroup> sensorDetail(List<TelemetrySensor> sensorList,
+                                                    List<TelemetrySensorGroup> sensorGroupList) {
         List<TelemetrySensorGroup> list = new ArrayList<>();
         for (int i = 0; i < sensorList.size(); i++) {
             for (int j = 0; j < sensorGroupList.size(); j++) {
@@ -215,7 +230,8 @@ public class DataProcessor {
     }
 
     public List<TelemetryDestinationGroup> getDestinationGroupDetailById(TelemetrySubscription subscription) {
-        return destinationDetail(subscription.getTelemetryDestination(), getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID));
+        return destinationDetail(subscription.getTelemetryDestination(), getDestinationGroupFromDataStore(
+                IidConstants.TELEMETRY_IID));
     }
 
     private List<TelemetryDestinationGroup> destinationDetail(List<TelemetryDestination> destinationList,
@@ -291,7 +307,8 @@ public class DataProcessor {
         List<Destination> destinationList = new ArrayList<>();
         for (DestinationProfile destinationProfile : list) {
             DestinationBuilder destinationBuilder = new DestinationBuilder();
-            destinationBuilder.withKey(new DestinationKey(destinationProfile.getDestinationAddress(), destinationProfile.getDestinationPort()));
+            destinationBuilder.withKey(new DestinationKey(destinationProfile.getDestinationAddress(),
+                    destinationProfile.getDestinationPort()));
             destinationBuilder.setDestinationAddress(destinationProfile.getDestinationAddress());
             destinationBuilder.setDestinationPort(destinationProfile.getDestinationPort());
             destinationList.add(destinationBuilder.build());
@@ -302,8 +319,6 @@ public class DataProcessor {
     }
 
     private Subscriptions convertSubscription(TelemetrySubscription subscription) {
-
-        List<Subscription> subscriptionList = new ArrayList<>();
         SubscriptionBuilder subscriptionBuilder = new SubscriptionBuilder();
         subscriptionBuilder.withKey(new SubscriptionKey(subscription.getSubscriptionName()));
         subscriptionBuilder.setSubscriptionName(subscription.getSubscriptionName());
@@ -312,6 +327,7 @@ public class DataProcessor {
                 subscription.getProtocolType(), subscription.getEncodingType()));
         subscriptionBuilder.setSensorProfiles(convertSensorProfiles(subscription.getTelemetrySensor()));
         subscriptionBuilder.setDestinationGroups(convertDestinationGroups(subscription.getTelemetryDestination()));
+        List<Subscription> subscriptionList = new ArrayList<>();
         subscriptionList.add(subscriptionBuilder.build());
         PersistentBuilder persistentBuilder = new PersistentBuilder();
         persistentBuilder.setSubscription(subscriptionList);
@@ -408,7 +424,8 @@ public class DataProcessor {
     }
 
     private org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
-            .subscriptions.persistent.subscription.DestinationGroups convertDestinationGroups(List<TelemetryDestination> list) {
+            .subscriptions.persistent.subscription.DestinationGroups convertDestinationGroups(
+                    List<TelemetryDestination> list) {
         List<org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
                 .subscriptions.persistent.subscription.destination.groups.DestinationGroup> destinationGroupList =
                 new ArrayList<>();
