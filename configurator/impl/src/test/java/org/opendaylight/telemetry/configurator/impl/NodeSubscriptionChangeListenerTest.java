@@ -56,7 +56,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
     private NodeSubscriptionChangeListener listener;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dataProcessor = new DataProcessor(getDataBroker());
         configurationWriter = new ConfigurationWriter(mountPointService);
         listener = new NodeSubscriptionChangeListener(getDataBroker(), configurationWriter, dataProcessor);
@@ -66,7 +66,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
     }
 
     @Test
-    public void testAddSubscription() throws Exception {
+    public void testAddSubscription() {
         addNodeToDatastore("1", null);
         addNodeToDatastore("1", constructSubList("sub1", "10.12.13.14", "sensor1",
                 "100", "des1"));
@@ -78,7 +78,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
     }
 
     @Test
-    public void testModifySubscription() throws Exception {
+    public void testModifySubscription() {
         addNodeToDatastore("1", constructSubList("sub1", "10.12.13.14", "sensor1",
                 "100", "des1"));
         addNodeToDatastore("1", constructSubList("sub1", "10.15.16.17", "sensor1",
@@ -92,7 +92,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
     }
 
     @Test
-    public void testDelSubscription() throws Exception {
+    public void testDelSubscription() {
         addNodeToDatastore("1", constructSubList("sub1", "10.12.13.14", "sensor1",
                 "100", "des1"));
         addNodeToDatastore("1", null);
@@ -147,7 +147,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
         nodeBuilder.setTelemetrySubscription(subscriptionList);
         tx.put(LogicalDatastoreType.CONFIGURATION, path, nodeBuilder.build(), true);
         try {
-            tx.submit().get();
+            tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
             return;
         }
@@ -169,7 +169,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
 
         tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
         try {
-            tx.submit().get();
+            tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
             return;
         }
@@ -192,7 +192,7 @@ public class NodeSubscriptionChangeListenerTest extends AbstractConcurrentDataBr
 
         tx.put(LogicalDatastoreType.CONFIGURATION, desGroupPath, builder.build(), true);
         try {
-            tx.submit().get();
+            tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
             return;
         }

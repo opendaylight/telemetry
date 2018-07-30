@@ -8,9 +8,10 @@
 package org.opendaylight.telemetry.configurator.impl;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
@@ -20,6 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.Subscriptions;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.Persistent;
@@ -67,7 +69,7 @@ public class ConfigurationWriter {
         this.mountPointService = mountPointService;
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> writeTelemetryConfig(
+    public FluentFuture<? extends CommitInfo> writeTelemetryConfig(
             ConfigurationType type, String nodeId, String subscriptionName, TelemetrySystem data) {
         if (type == ConfigurationType.DELETE) {
             LOG.info("access delete write");
@@ -78,13 +80,13 @@ public class ConfigurationWriter {
         return write(OperateType.MERGE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID, data);
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> delSubscription(String nodeId,
+    public FluentFuture<? extends CommitInfo> delSubscription(String nodeId,
                                                                                  String subscriptionName) {
         return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
                 .child(Persistent.class).child(Subscription.class, new SubscriptionKey(subscriptionName)), null);
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionSensor(String nodeId,
+    public FluentFuture<? extends CommitInfo> delSubscriptionSensor(String nodeId,
                                                                                        String subscriptionName,
                                                                                        String sensorId) {
         return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
@@ -92,7 +94,7 @@ public class ConfigurationWriter {
                 .child(SensorProfiles.class).child(SensorProfile.class, new SensorProfileKey(sensorId)), null);
     }
 
-    public CheckedFuture<Void, TransactionCommitFailedException> delSubscriptionDestination(String nodeId,
+    public FluentFuture<? extends CommitInfo> delSubscriptionDestination(String nodeId,
                                                                                             String subscriptionName,
                                                                                             String destinationId) {
         return write(OperateType.DELETE, nodeId, IidConstants.TELEMETRY_SYSTEM_IID.child(Subscriptions.class)
@@ -101,7 +103,7 @@ public class ConfigurationWriter {
                 null);
     }
 
-    private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> write(
+    private <T extends DataObject> FluentFuture<? extends CommitInfo> write(
             OperateType type, String nodeId, InstanceIdentifier<T> path, T data) {
         LOG.info("already entered write");
         final DataBroker dataBroker = getDataBroker(nodeId);
@@ -143,7 +145,7 @@ public class ConfigurationWriter {
         return nodeMountPoint.get();
     }
 
-    private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> operate(
+    private <T extends DataObject> FluentFuture<? extends CommitInfo> operate(
             OperateType type, DataBroker dataBroker, final int tries, InstanceIdentifier<T> path, T data) {
         final WriteTransaction writeTransaction = dataBroker.newWriteOnlyTransaction();
         switch (type) {
@@ -162,17 +164,17 @@ public class ConfigurationWriter {
 
         }
 
-        final CheckedFuture<Void, TransactionCommitFailedException> submitResult = writeTransaction.submit();
-        Futures.addCallback(submitResult, new FutureCallback<Void>() {
+        final FluentFuture<? extends CommitInfo> submitResult = writeTransaction.commit();
+        Futures.addCallback(submitResult, new FutureCallback<CommitInfo>() {
             @Override
-            public void onSuccess(final Void result) {
+            public void onSuccess(final CommitInfo result) {
             }
 
             @Override
             public void onFailure(final Throwable throwable) {
                 operateFail(throwable,type,dataBroker,path,data,tries);
             }
-        });
+        }, MoreExecutors.directExecutor());
 
         return submitResult;
     }

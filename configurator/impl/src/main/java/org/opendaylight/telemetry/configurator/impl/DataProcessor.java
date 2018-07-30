@@ -8,22 +8,21 @@
 package org.opendaylight.telemetry.configurator.impl;
 
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPaths;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystemBuilder;
-
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.DestinationGroups;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.DestinationGroupsBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.SensorGroups;
@@ -161,7 +160,7 @@ public class DataProcessor {
         }
     }
 
-    private <T extends DataObject> CheckedFuture<Void, TransactionCommitFailedException> operateDataStore(
+    private <T extends DataObject> FluentFuture<? extends CommitInfo> operateDataStore(
             ConfigurationType type, T data, InstanceIdentifier<T> path) {
         final WriteTransaction writeTransaction = dataBroker.newWriteOnlyTransaction();
         switch (type) {
@@ -177,7 +176,7 @@ public class DataProcessor {
             default:
                 break;
         }
-        final CheckedFuture<Void, TransactionCommitFailedException> submitResult = writeTransaction.submit();
+        final FluentFuture<? extends CommitInfo> submitResult = writeTransaction.commit();
         return submitResult;
     }
 

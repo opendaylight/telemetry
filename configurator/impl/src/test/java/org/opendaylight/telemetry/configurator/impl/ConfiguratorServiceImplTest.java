@@ -122,7 +122,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
             + " or exist destination not configured!";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         dataProcessor = new DataProcessor(getDataBroker());
         configurationWriter = new ConfigurationWriter(mountPointService);
         configuratorService = new ConfiguratorServiceImpl(dataProcessor, configurationWriter);
@@ -500,7 +500,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
 
         tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
         try {
-            tx.submit().get();
+            tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
             return;
         }
@@ -560,7 +560,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
 
         tx.put(LogicalDatastoreType.CONFIGURATION, desGroupPath, builder.build(), true);
         try {
-            tx.submit().get();
+            tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
             return;
         }
@@ -657,7 +657,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
 
         tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
         try {
-            tx.submit().get();
+            tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
             return;
         }
