@@ -45,6 +45,7 @@ import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.sensor.groups.sensor.group.sensor.paths.SensorPath;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.sensor.groups.sensor.group.sensor.paths.SensorPathBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.sensor.groups.sensor.group.sensor.paths.SensorPathKey;
+import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.sensor.groups.sensor.group.sensor.paths.sensor.path.ConfigBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.PersistentBuilder;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.Subscription;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system.subscriptions.persistent.SubscriptionBuilder;
@@ -84,9 +85,10 @@ public class DataProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataProcessor.class);
 
-
-
     private final DataBroker dataBroker;
+    private static final String DATA_NOT_NULL = "Telemetry data from controller data store is not null";
+    private static final String DATA_NULL = "Telemetry data from controller data store is null";
+    private static final String FAIL_READ = "Failed to read {} ";
 
     public DataProcessor(DataBroker dataBroker) {
         this.dataBroker = dataBroker;
@@ -98,13 +100,13 @@ public class DataProcessor {
         try {
             telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
             if (telemetry.isPresent()) {
-                LOG.info("Telemetry data from controller data store is not null");
+                LOG.info(DATA_NOT_NULL);
                 return telemetry.get().getTelemetrySensorGroup();
             }
         } catch (ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
+            LOG.warn(FAIL_READ, path, e);
         }
-        LOG.info("Telemetry data from controller data store is null");
+        LOG.info(DATA_NULL);
         return null;
     }
 
@@ -114,13 +116,13 @@ public class DataProcessor {
         try {
             telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
             if (telemetry.isPresent()) {
-                LOG.info("Telemetry data from controller data store is not null");
+                LOG.info(DATA_NOT_NULL);
                 return telemetry.get().getTelemetryDestinationGroup();
             }
         } catch (ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
+            LOG.warn(FAIL_READ, path, e);
         }
-        LOG.info("Telemetry data from controller data store is null");
+        LOG.info(DATA_NULL);
         return null;
     }
 
@@ -130,13 +132,13 @@ public class DataProcessor {
         try {
             telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
             if (telemetry.isPresent()) {
-                LOG.info("Telemetry data from controller data store is not null");
+                LOG.info(DATA_NOT_NULL);
                 return telemetry.get().getTelemetryNode();
             }
         } catch (ReadFailedException e) {
-            LOG.warn("Failed to read {} ", path, e);
+            LOG.warn(FAIL_READ, path, e);
         }
-        LOG.info("Telemetry data from controller data store is null");
+        LOG.info(DATA_NULL);
         return null;
     }
 
@@ -263,7 +265,6 @@ public class DataProcessor {
             SensorGroupBuilder builder = new SensorGroupBuilder();
             builder.withKey(new SensorGroupKey(telemetrySensorGroup.getTelemetrySensorGroupId()));
             builder.setSensorGroupId(telemetrySensorGroup.getTelemetrySensorGroupId());
-            //builder.setConfig(new ConfigBuilder().setSensorGroupId(telemetrySensorGroup.getTelemetrySensorGroupId()));
             builder.setSensorPaths(convertSensorPaths(telemetrySensorGroup.getTelemetrySensorPaths()));
             sensorGroupList.add(builder.build());
         }
@@ -278,8 +279,13 @@ public class DataProcessor {
             SensorPathBuilder sensorPathBuilder = new SensorPathBuilder();
             sensorPathBuilder.withKey(new SensorPathKey(paths.getTelemetrySensorPath()));
             sensorPathBuilder.setPath(paths.getTelemetrySensorPath());
-//            sensorPathBuilder.setConfig(new ConfigBuilder().setPath(paths.getTelemetrySensorPath())
-//                    .setExcludeFilter(paths.getSensorExcludeFilter()).build());
+            if (null == paths.getSensorExcludeFilter()) {
+                sensorPathBuilder.setConfig(new ConfigBuilder().setPath(paths.getTelemetrySensorPath())
+                        .setExcludeFilter(null).build());
+            } else {
+                sensorPathBuilder.setConfig(new ConfigBuilder().setPath(paths.getTelemetrySensorPath())
+                        .setExcludeFilter(paths.getSensorExcludeFilter()).build());
+            }
             sensorPathList.add(sensorPathBuilder.build());
         }
         SensorPathsBuilder builder = new SensorPathsBuilder();
@@ -293,7 +299,6 @@ public class DataProcessor {
             DestinationGroupBuilder builder = new DestinationGroupBuilder();
             builder.withKey(new DestinationGroupKey(telemetryDestinationGroup.getDestinationGroupId()));
             builder.setGroupId(telemetryDestinationGroup.getDestinationGroupId());
-            //builder.setConfig();
             builder.setDestinations(convertDestinations(telemetryDestinationGroup.getDestinationProfile()));
             destinationGroupList.add(builder.build());
         }
@@ -438,7 +443,6 @@ public class DataProcessor {
                     .rev170824.telemetry.top.telemetry.system.subscriptions.persistent.subscription.destination
                     .groups.DestinationGroupKey(list.get(i).getDestinationGroupId()));
             destinationGroupBuilder.setGroupId(list.get(i).getDestinationGroupId());
-            //destinationGroupBuilder.setConfig();
             destinationGroupList.add(destinationGroupBuilder.build());
         }
         org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.telemetry.system
