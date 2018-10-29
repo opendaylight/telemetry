@@ -9,7 +9,10 @@ package org.opendaylight.telemetry.configurator.impl;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
+import java.util.concurrent.Executors;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationOutput;
@@ -68,6 +71,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
 
     private DataProcessor dataProcessor;
     private ConfigurationWriter configurationWriter;
+    private ListeningExecutorService executorService;
+
     private static final String INPUT_NULL = "Input is null!";
     private static final String SENSOR_GROUP_NULL = "There is no sensor group provided by input!";
     private static final String SENSOR_PATHS = " sensor paths not provided by input!";
@@ -96,6 +101,16 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     public ConfiguratorServiceImpl(DataProcessor dataProcessor, ConfigurationWriter configurationWriter) {
         this.dataProcessor = dataProcessor;
         this.configurationWriter = configurationWriter;
+    }
+
+    public void init() {
+        LOG.info("Configuration rpc impl initiated.");
+        executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1));
+    }
+
+    public void close() {
+        LOG.info("Configuration rpc impl closed.");
+        executorService.shutdown();
     }
 
     @Override

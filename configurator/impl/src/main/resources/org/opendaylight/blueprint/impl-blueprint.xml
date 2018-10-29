@@ -37,7 +37,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </bean>
 
   <bean id="configuratorServiceImpl"
-        class="org.opendaylight.telemetry.configurator.impl.ConfiguratorServiceImpl">
+        class="org.opendaylight.telemetry.configurator.impl.ConfiguratorServiceImpl"
+        init-method="init" destroy-method="close">
     <argument ref="dataProcessor" />
     <argument ref="configurationWriter" />
   </bean>
