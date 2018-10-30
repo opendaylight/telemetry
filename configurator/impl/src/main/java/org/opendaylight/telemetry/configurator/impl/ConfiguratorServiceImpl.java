@@ -240,6 +240,29 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         };
     }
 
+    private Callable<RpcResult<DeleteTelemetryDestinationOutput>> delTelDes(DeleteTelemetryDestinationInput input) {
+        return () -> {
+            //check input
+            DeleteTelemetryDestinationOutputBuilder builder = new DeleteTelemetryDestinationOutputBuilder();
+            if (null == input) {
+                builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+            if (null == input.getTelemetryDestinationGroup() || input.getTelemetryDestinationGroup().isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, DES_GROUP_ID_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            for (int i = 0; i < input.getTelemetryDestinationGroup().size(); i++) {
+                dataProcessor.deleteDestinationGroupFromDataStore(input.getTelemetryDestinationGroup().get(i)
+                        .getDestinationGroupId());
+            }
+
+            builder.setConfigureResult(getConfigResult(true, ""));
+            return RpcResultBuilder.success(builder.build()).build();
+        };
+    }
+
     @Override
     public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         return executorService.submit(addTelSor(input));
@@ -272,24 +295,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public ListenableFuture<RpcResult<DeleteTelemetryDestinationOutput>> deleteTelemetryDestination(
             DeleteTelemetryDestinationInput input) {
-        //check input
-        DeleteTelemetryDestinationOutputBuilder builder = new DeleteTelemetryDestinationOutputBuilder();
-        if (null == input) {
-            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-        if (null == input.getTelemetryDestinationGroup() || input.getTelemetryDestinationGroup().isEmpty()) {
-            builder.setConfigureResult(getConfigResult(false, DES_GROUP_ID_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        for (int i = 0; i < input.getTelemetryDestinationGroup().size(); i++) {
-            dataProcessor.deleteDestinationGroupFromDataStore(input.getTelemetryDestinationGroup().get(i)
-                    .getDestinationGroupId());
-        }
-
-        builder.setConfigureResult(getConfigResult(true, ""));
-        return RpcResultBuilder.success(builder.build()).buildFuture();
+        return executorService.submit(delTelDes(input));
     }
 
     @Override
