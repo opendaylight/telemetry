@@ -188,6 +188,40 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         };
     }
 
+    private Callable<RpcResult<AddTelemetryDestinationOutput>> addTelDes(AddTelemetryDestinationInput input) {
+        return () -> {
+            //check input
+            AddTelemetryDestinationOutputBuilder builder = new AddTelemetryDestinationOutputBuilder();
+            if (null == input) {
+                builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+            List<TelemetryDestinationGroup> destinationGroupList = input.getTelemetryDestinationGroup();
+            if (null == destinationGroupList || destinationGroupList.isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, DES_GROUP_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+            for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
+                if (null == destinationGroup.getDestinationProfile()
+                        || destinationGroup.getDestinationProfile().isEmpty()) {
+                    builder.setConfigureResult(getConfigResult(false, destinationGroup.getDestinationGroupId() + DES_FILE));
+                    return RpcResultBuilder.success(builder.build()).build();
+                }
+            }
+
+            LOG.info("Check destination group whether exist");
+            if (checkDesGroupExistedInDataStore(destinationGroupList)) {
+                builder.setConfigureResult(getConfigResult(false, DES_GROUP_EXIST));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            LOG.info("Write add telemetry sensor config to dataStore");
+            dataProcessor.addDestinationGroupToDataStore(destinationGroupList);
+            builder.setConfigureResult(getConfigResult(true, ""));
+            return RpcResultBuilder.success(builder.build()).build();
+        };
+    }
+
     @Override
     public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         return executorService.submit(addTelSor(input));
@@ -208,35 +242,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public ListenableFuture<RpcResult<AddTelemetryDestinationOutput>> addTelemetryDestination(
             AddTelemetryDestinationInput input) {
-        //check input
-        AddTelemetryDestinationOutputBuilder builder = new AddTelemetryDestinationOutputBuilder();
-        if (null == input) {
-            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-        List<TelemetryDestinationGroup> destinationGroupList = input.getTelemetryDestinationGroup();
-        if (null == destinationGroupList || destinationGroupList.isEmpty()) {
-            builder.setConfigureResult(getConfigResult(false, DES_GROUP_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-        for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
-            if (null == destinationGroup.getDestinationProfile()
-                    || destinationGroup.getDestinationProfile().isEmpty()) {
-                builder.setConfigureResult(getConfigResult(false, destinationGroup.getDestinationGroupId() + DES_FILE));
-                return RpcResultBuilder.success(builder.build()).buildFuture();
-            }
-        }
-
-        LOG.info("Check destination group whether exist");
-        if (checkDesGroupExistedInDataStore(destinationGroupList)) {
-            builder.setConfigureResult(getConfigResult(false, DES_GROUP_EXIST));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        LOG.info("Write add telemetry sensor config to dataStore");
-        dataProcessor.addDestinationGroupToDataStore(destinationGroupList);
-        builder.setConfigureResult(getConfigResult(true, ""));
-        return RpcResultBuilder.success(builder.build()).buildFuture();
+        return executorService.submit(addTelDes(input));
     }
 
     @Override
