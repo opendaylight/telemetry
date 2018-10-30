@@ -222,6 +222,24 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         };
     }
 
+    private Callable<RpcResult<QueryTelemetryDestinationOutput>> queryTelDes(QueryTelemetryDestinationInput input) {
+        return () -> {
+            //check input
+            if (null == input) {
+                return rpcErr(INPUT_NULL);
+            }
+
+            List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor
+                    .getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
+            if (null == allDestinationGroupList || allDestinationGroupList.isEmpty()) {
+                return rpcErr(NO_DES_GROUP);
+            }
+            QueryTelemetryDestinationOutputBuilder builder = new QueryTelemetryDestinationOutputBuilder();
+            builder.setTelemetryDestinationGroup(allDestinationGroupList);
+            return RpcResultBuilder.success(builder.build()).build();
+        };
+    }
+
     @Override
     public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         return executorService.submit(addTelSor(input));
@@ -248,19 +266,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public ListenableFuture<RpcResult<QueryTelemetryDestinationOutput>> queryTelemetryDestination(
             QueryTelemetryDestinationInput input) {
-        //check input
-//        if (null == input) {
-//            return rpcErr(INPUT_NULL);
-//        }
-
-        List<TelemetryDestinationGroup> allDestinationGroupList = dataProcessor
-                .getDestinationGroupFromDataStore(IidConstants.TELEMETRY_IID);
-//        if (null == allDestinationGroupList || allDestinationGroupList.isEmpty()) {
-//            return rpcErr(NO_DES_GROUP);
-//        }
-        QueryTelemetryDestinationOutputBuilder builder = new QueryTelemetryDestinationOutputBuilder();
-        builder.setTelemetryDestinationGroup(allDestinationGroupList);
-        return RpcResultBuilder.success(builder.build()).buildFuture();
+        return executorService.submit(queryTelDes(input));
     }
 
     @Override
