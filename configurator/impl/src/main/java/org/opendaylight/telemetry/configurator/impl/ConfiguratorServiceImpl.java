@@ -166,6 +166,28 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         };
     }
 
+    private Callable<RpcResult<DeleteTelemetrySensorOutput>> delTelSor(DeleteTelemetrySensorInput input) {
+        return () -> {
+            //check input
+            DeleteTelemetrySensorOutputBuilder builder = new DeleteTelemetrySensorOutputBuilder();
+            if (null == input) {
+                builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+            if (null == input.getTelemetrySensorGroup() || input.getTelemetrySensorGroup().isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, SENSOR_GROUP_ID_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            for (int i = 0; i < input.getTelemetrySensorGroup().size(); i++) {
+                dataProcessor.deleteSensorGroupFromDataStore(input.getTelemetrySensorGroup().get(i).getSensorGroupId());
+            }
+
+            builder.setConfigureResult(getConfigResult(true, ""));
+            return RpcResultBuilder.success(builder.build()).build();
+        };
+    }
+
     @Override
     public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         return executorService.submit(addTelSor(input));
@@ -180,23 +202,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public ListenableFuture<RpcResult<DeleteTelemetrySensorOutput>> deleteTelemetrySensor(
             DeleteTelemetrySensorInput input) {
-        //check input
-        DeleteTelemetrySensorOutputBuilder builder = new DeleteTelemetrySensorOutputBuilder();
-        if (null == input) {
-            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-        if (null == input.getTelemetrySensorGroup() || input.getTelemetrySensorGroup().isEmpty()) {
-            builder.setConfigureResult(getConfigResult(false, SENSOR_GROUP_ID_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        for (int i = 0; i < input.getTelemetrySensorGroup().size(); i++) {
-            dataProcessor.deleteSensorGroupFromDataStore(input.getTelemetrySensorGroup().get(i).getSensorGroupId());
-        }
-
-        builder.setConfigureResult(getConfigResult(true, ""));
-        return RpcResultBuilder.success(builder.build()).buildFuture();
+        return executorService.submit(delTelSor(input));
     }
 
     @Override
