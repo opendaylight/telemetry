@@ -91,8 +91,6 @@ public class DataServerImpl {
                 public void onNext(TelemetryStreamRequest telemetryStreamRequest) {
                     dataStorage(telemetryStreamRequest);
                     TelemetryNotification.publish(telemetryStreamRequest);
-                    TelemetryStreamResponse.Builder builder = TelemetryStreamResponse.newBuilder();
-                    responseObserver.onNext(builder.build());
                 }
 
                 @Override
@@ -104,6 +102,8 @@ public class DataServerImpl {
                 @Override
                 public void onCompleted() {
                     LOG.info("Telemetry stream request completed.");
+                    TelemetryStreamResponse response = TelemetryStreamResponse.newBuilder().build();
+                    responseObserver.onNext(response);
                     responseObserver.onCompleted();
                 }
             };
