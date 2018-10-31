@@ -311,6 +311,25 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         };
     }
 
+    private Callable<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelSub(
+            QueryNodeTelemetrySubscriptionInput input) {
+        return () -> {
+            //check input
+            if (null == input) {
+                return rpcErr(INPUT_NULL);
+            }
+
+            List<TelemetryNode> allNodeSubscriptionList = dataProcessor
+                    .getNodeSubscriptionFromDataStore(IidConstants.TELEMETRY_IID);
+            if (null == allNodeSubscriptionList || allNodeSubscriptionList.isEmpty()) {
+                return rpcErr(NO_SUBSCR);
+            }
+            QueryNodeTelemetrySubscriptionOutputBuilder builder = new QueryNodeTelemetrySubscriptionOutputBuilder();
+            builder.setTelemetryNode(allNodeSubscriptionList);
+            return RpcResultBuilder.success(builder.build()).build();
+        };
+    }
+
     @Override
     public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         return executorService.submit(addTelSor(input));
@@ -355,19 +374,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public ListenableFuture<RpcResult<QueryNodeTelemetrySubscriptionOutput>> queryNodeTelemetrySubscription(
             QueryNodeTelemetrySubscriptionInput input) {
-        //check input
-//        if (null == input) {
-//            return rpcErr(INPUT_NULL);
-//        }
-
-        List<TelemetryNode> allNodeSubscriptionList = dataProcessor
-                .getNodeSubscriptionFromDataStore(IidConstants.TELEMETRY_IID);
-//        if (null == allNodeSubscriptionList || allNodeSubscriptionList.isEmpty()) {
-//            return rpcErr(NO_SUBSCR);
-//        }
-        QueryNodeTelemetrySubscriptionOutputBuilder builder = new QueryNodeTelemetrySubscriptionOutputBuilder();
-        builder.setTelemetryNode(allNodeSubscriptionList);
-        return RpcResultBuilder.success(builder.build()).buildFuture();
+        return executorService.submit(queryNodeTelSub(input));
     }
 
     @Override
