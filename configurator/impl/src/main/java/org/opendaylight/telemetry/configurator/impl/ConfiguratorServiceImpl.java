@@ -368,6 +368,51 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
         };
     }
 
+    private Callable<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>> delNodeTelSubSor(
+            DeleteNodeTelemetrySubscriptionSensorInput input) {
+        return () -> {
+            DeleteNodeTelemetrySubscriptionSensorOutputBuilder builder = new
+                    DeleteNodeTelemetrySubscriptionSensorOutputBuilder();
+            if (null == input) {
+                builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            if (null == input.getTelemetryNode() || input.getTelemetryNode().isEmpty()) {
+                builder.setConfigureResult(getConfigResult(false, NODE_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            if (!checkSubscriProvidedByDelSensorInput(input)) {
+                builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            if (!checkSubscriSensorProvidedByDelSensorInput(input)) {
+                builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_SENSOR_NULL));
+                return RpcResultBuilder.success(builder.build()).build();
+            }
+
+            for (int i = 0; i < input.getTelemetryNode().size(); i++) {
+                for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
+                    dataProcessor.deleteNodeSubscriptionSensorFromDataStore(input.getTelemetryNode().get(i).getNodeId(),
+                            input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
+                            input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                                    .getTelemetryNodeSubscriptionSensor());
+                    for (int k = 0; k < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                            .getTelemetryNodeSubscriptionSensor().size(); k++) {
+                        configurationWriter.delSubscriptionSensor(input.getTelemetryNode().get(i).getNodeId(),
+                                input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
+                                input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                                        .getTelemetryNodeSubscriptionSensor().get(k).getSensorGroupId());
+                    }
+                }
+            }
+            builder.setConfigureResult(getConfigResult(true, ""));
+            return RpcResultBuilder.success(builder.build()).build();
+        };
+    }
+
     @Override
     public ListenableFuture<RpcResult<AddTelemetrySensorOutput>> addTelemetrySensor(AddTelemetrySensorInput input) {
         return executorService.submit(addTelSor(input));
@@ -424,45 +469,7 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
     @Override
     public ListenableFuture<RpcResult<DeleteNodeTelemetrySubscriptionSensorOutput>>
         deleteNodeTelemetrySubscriptionSensor(DeleteNodeTelemetrySubscriptionSensorInput input) {
-        DeleteNodeTelemetrySubscriptionSensorOutputBuilder builder = new
-                DeleteNodeTelemetrySubscriptionSensorOutputBuilder();
-        if (null == input) {
-            builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        if (null == input.getTelemetryNode() || input.getTelemetryNode().isEmpty()) {
-            builder.setConfigureResult(getConfigResult(false, NODE_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        if (!checkSubscriProvidedByDelSensorInput(input)) {
-            builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        if (!checkSubscriSensorProvidedByDelSensorInput(input)) {
-            builder.setConfigureResult(getConfigResult(false, NODE_SUBSCR_SENSOR_NULL));
-            return RpcResultBuilder.success(builder.build()).buildFuture();
-        }
-
-        for (int i = 0; i < input.getTelemetryNode().size(); i++) {
-            for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
-                dataProcessor.deleteNodeSubscriptionSensorFromDataStore(input.getTelemetryNode().get(i).getNodeId(),
-                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
-                        input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                                .getTelemetryNodeSubscriptionSensor());
-                for (int k = 0; k < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                        .getTelemetryNodeSubscriptionSensor().size(); k++) {
-                    configurationWriter.delSubscriptionSensor(input.getTelemetryNode().get(i).getNodeId(),
-                            input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
-                            input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                                    .getTelemetryNodeSubscriptionSensor().get(k).getSensorGroupId());
-                }
-            }
-        }
-        builder.setConfigureResult(getConfigResult(true, ""));
-        return RpcResultBuilder.success(builder.build()).buildFuture();
+        return executorService.submit(delNodeTelSubSor(input));
     }
 
     @Override
