@@ -344,12 +344,12 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
     public void testQueryNodeTelemetrySubscription() throws Exception {
         Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result1 = configuratorService
                 .queryNodeTelemetrySubscription(null);
-        //Assert.assertEquals(1, result1.get().getErrors().size());
+        Assert.assertEquals(1, result1.get().getErrors().size());
 
         QueryNodeTelemetrySubscriptionInputBuilder builder = new QueryNodeTelemetrySubscriptionInputBuilder();
         Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result2 = configuratorService
                 .queryNodeTelemetrySubscription(builder.build());
-        //Assert.assertEquals(1, result2.get().getErrors().size());
+        Assert.assertEquals(1, result2.get().getErrors().size());
 
         addNodeSubToDataStore("node1", "sub1", "10.42.89.15", "sensor1", new BigInteger("100"), "des1");
         Future<RpcResult<QueryNodeTelemetrySubscriptionOutput>> result3 = configuratorService
