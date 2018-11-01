@@ -102,22 +102,18 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
     private static final String SENSOR_GROUP_NULL = "There is no sensor group provided by input!";
     private static final String SENSOR_PATHS = " sensor paths not provided by input!";
     private static final String SENSOR_GROUP_EXIST = "There are sensor groups Exist!";
-    private static final String NO_SENSOR_GROUP = "No sensor group configured!";
     private static final String SENSOR_GROUP_ID_NULL = "There is no sensor group id provided by input!";
 
     private static final String DES_GROUP_NULL = "There is no destination group provided by input!";
     private static final String DES_FILE = " destination profile not provided by input!";
     private static final String DES_GROUP_EXIST = "There are destination groups Exist!";
-    private static final String NO_DES_GROUP = "No destination group configured!";
     private static final String DES_GROUP_ID_NULL = "There is no destination group id provided by input!";
-    private static final String NO_SUBSCR = "No node subscription configured!";
 
     private static final String NODE_NULL = "There is no node id provided by input!";
     private static final String SUBSCR_NULL = " no subscription provided by input!";
     private static final String NODE_SUBSCR_NULL = "Exist node not provide subscription!";
     private static final String NODE_SUBSCR_SENSOR_NULL = "There is no sensor provided in node subscription!";
     private static final String NODE_SUBSCR_DES_NULL = "There is no destination provided in node subscription!";
-    private static final String SUBSCR_PARAS_NULL = " exist Param is null! ";
     private static final String SUBSCR_SENSOR_ABNORMAL = "Sensor empty in node subscription or exist Param in"
             + " sensor is null or exist sensor not configured!";
     private static final String SUBSCR_DES_ABNORMAL = "Destination empty in node subscription"
