@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
-import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectModification;
+import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
+import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataTreeModification;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.rev171120.telemetry.destination.specification.TelemetryDestinationGroup;
@@ -42,7 +42,7 @@ public class NodeSubscriptionChangeListener implements DataTreeChangeListener<Te
     }
 
     public void init() {
-        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<TelemetrySubscription>(
+        dataBroker.registerDataTreeChangeListener(DataTreeIdentifier.create(
                 LogicalDatastoreType.CONFIGURATION, IidConstants.TELEMETRY_IID.child(TelemetryNode.class)
                 .child(TelemetrySubscription.class)), this);
         LOG.info("Begin to Listen the node subscription changes");

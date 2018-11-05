@@ -7,17 +7,18 @@
  */
 package org.opendaylight.telemetry.configurator.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import com.google.common.util.concurrent.FluentFuture;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+//import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPaths;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
@@ -98,12 +99,12 @@ public class DataProcessor {
         final ReadTransaction readTransaction = dataBroker.newReadOnlyTransaction();
         Optional<Telemetry> telemetry = null;
         try {
-            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
+            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).get();
             if (telemetry.isPresent()) {
                 LOG.info(DATA_NOT_NULL);
                 return telemetry.get().getTelemetrySensorGroup();
             }
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn(FAIL_READ, path, e);
         }
         LOG.info(DATA_NULL);
@@ -114,12 +115,12 @@ public class DataProcessor {
         final ReadTransaction readTransaction = dataBroker.newReadOnlyTransaction();
         Optional<Telemetry> telemetry = null;
         try {
-            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
+            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).get();
             if (telemetry.isPresent()) {
                 LOG.info(DATA_NOT_NULL);
                 return telemetry.get().getTelemetryDestinationGroup();
             }
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn(FAIL_READ, path, e);
         }
         LOG.info(DATA_NULL);
@@ -130,12 +131,12 @@ public class DataProcessor {
         final ReadTransaction readTransaction = dataBroker.newReadOnlyTransaction();
         Optional<Telemetry> telemetry = null;
         try {
-            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
+            telemetry = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).get();
             if (telemetry.isPresent()) {
                 LOG.info(DATA_NOT_NULL);
                 return telemetry.get().getTelemetryNode();
             }
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn(FAIL_READ, path, e);
         }
         LOG.info(DATA_NULL);

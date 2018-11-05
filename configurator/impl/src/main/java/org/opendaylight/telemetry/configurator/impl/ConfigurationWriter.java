@@ -7,17 +7,17 @@
  */
 package org.opendaylight.telemetry.configurator.impl;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
-import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
-import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
-import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
-import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.mdsal.binding.api.ReadTransaction;
+import org.opendaylight.mdsal.binding.api.WriteTransaction;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -40,6 +40,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutionException;
 
 public class ConfigurationWriter {
 
@@ -105,45 +107,46 @@ public class ConfigurationWriter {
 
     private <T extends DataObject> FluentFuture<? extends CommitInfo> write(
             OperateType type, String nodeId, InstanceIdentifier<T> path, T data) {
-        LOG.info("already entered write");
-        final DataBroker dataBroker = getDataBroker(nodeId);
-        if (null == dataBroker) {
-            LOG.info("write process data broker is null");
-            return null;
-        }
-        LOG.info("write process data broker is not null");
-        return operate(type, dataBroker, RETRY_WRITE_MAX, path, data);
+//        LOG.info("already entered write");
+//        final DataBroker dataBroker = getDataBroker(nodeId);
+//        if (null == dataBroker) {
+//            LOG.info("write process data broker is null");
+//            return null;
+//        }
+//        LOG.info("write process data broker is not null");
+//        return operate(type, dataBroker, RETRY_WRITE_MAX, path, data);
+        return null;
     }
 
-    private DataBroker getDataBroker(String nodeId) {
-        MountPoint mountPoint = getMountPoint(nodeId);
-        if (null == mountPoint) {
-            LOG.info("mount point is null");
-            return null;
-        }
-        LOG.info("mount point is not null");
-        Optional<DataBroker> nodeBroker = mountPoint.getService(DataBroker.class);
-        if (!nodeBroker.isPresent()) {
-            return null;
-        }
-        return nodeBroker.get();
-    }
-
-    private MountPoint getMountPoint(String nodeId) {
-        if (null == mountPointService) {
-            LOG.info("mount point service is null");
-            return null;
-        }
-        LOG.info("mount point service is not null");
-        Optional<MountPoint> nodeMountPoint = mountPointService.getMountPoint(IidConstants.NETCONF_TOPO_IID
-                .child(Node.class, new NodeKey(new NodeId(nodeId))));
-
-        if (!nodeMountPoint.isPresent()) {
-            return null;
-        }
-
-        return nodeMountPoint.get();
-    }
+//    private DataBroker getDataBroker(String nodeId) {
+//        MountPoint mountPoint = getMountPoint(nodeId);
+//        if (null == mountPoint) {
+//            LOG.info("mount point is null");
+//            return null;
+//        }
+//        LOG.info("mount point is not null");
+//        Optional<DataBroker> nodeBroker = mountPoint.getService(DataBroker.class);
+//        if (!nodeBroker.isPresent()) {
+//            return null;
+//        }
+//        return nodeBroker.get();
+//    }
+//
+//    private MountPoint getMountPoint(String nodeId) {
+//        if (null == mountPointService) {
+//            LOG.info("mount point service is null");
+//            return null;
+//        }
+//        LOG.info("mount point service is not null");
+//        Optional<MountPoint> nodeMountPoint = mountPointService.getMountPoint(IidConstants.NETCONF_TOPO_IID
+//                .child(Node.class, new NodeKey(new NodeId(nodeId))));
+//
+//        if (!nodeMountPoint.isPresent()) {
+//            return null;
+//        }
+//
+//        return nodeMountPoint.get();
+//    }
 
     private <T extends DataObject> FluentFuture<? extends CommitInfo> operate(
             OperateType type, DataBroker dataBroker, final int tries, InstanceIdentifier<T> path, T data) {
@@ -206,24 +209,24 @@ public class ConfigurationWriter {
     }
 
     public void query(String nodeId) {
-        DataBroker dataBroker = getDataBroker(nodeId);
-        if (null != readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID)) {
-            LOG.info("Data is {}", readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID));
-        } else {
-            LOG.info("Device data is null!");
-        }
+//        DataBroker dataBroker = getDataBroker(nodeId);
+//        if (null != readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID)) {
+//            LOG.info("Data is {}", readData(dataBroker, IidConstants.TELEMETRY_SYSTEM_IID));
+//        } else {
+//            LOG.info("Device data is null!");
+//        }
     }
 
     private <T extends DataObject> T readData(DataBroker nodeDataBroker, InstanceIdentifier<T> path) {
         final ReadTransaction readTransaction = nodeDataBroker.newReadOnlyTransaction();
         Optional<T> optionalData;
         try {
-            optionalData = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).checkedGet();
+            optionalData = readTransaction.read(LogicalDatastoreType.CONFIGURATION, path).get();
             if (optionalData.isPresent()) {
                 LOG.info("Data is not null");
                 return optionalData.get();
             }
-        } catch (ReadFailedException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("Failed to read {}", path, e);
         }
         return null;
