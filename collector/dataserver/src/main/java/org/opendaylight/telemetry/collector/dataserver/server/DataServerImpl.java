@@ -7,6 +7,7 @@
  */
 package org.opendaylight.telemetry.collector.dataserver.server;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
@@ -16,6 +17,7 @@ import org.opendaylight.telemetry.proto.*;
 import org.opendaylight.telemetry.proto.KeyValue;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
 
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryData;
@@ -81,8 +83,8 @@ public class DataServerImpl {
 
             inputBuilder.setNodeId(nodeId);
             inputBuilder.setTelemetryData(telemetryDataList);
-            Future<RpcResult<Void>> future = datastorageService.dataStore(inputBuilder.build());
-            RPCFutures.logResult(future, "data-storage", LOG);
+            ListenableFuture<RpcResult<DataStoreOutput>> future = datastorageService.dataStore(inputBuilder.build());
+            //RPCFutures.logResult(future, "data-storage", LOG);
         }
 
         public StreamObserver<TelemetryStreamRequest> publish(StreamObserver<TelemetryStreamResponse> responseObserver) {
