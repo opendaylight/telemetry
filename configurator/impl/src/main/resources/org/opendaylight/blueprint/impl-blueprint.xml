@@ -16,7 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     odl:type="default" />
 
   <reference id="mountService"
-    interface="org.opendaylight.controller.md.sal.binding.api.MountPointService"/>
+    interface="org.opendaylight.mdsal.binding.api.MountPointService"/>
 
   <bean id="configurationWriter"
         class="org.opendaylight.telemetry.configurator.impl.ConfigurationWriter">
