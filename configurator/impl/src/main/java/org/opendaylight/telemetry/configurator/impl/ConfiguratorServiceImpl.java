@@ -8,12 +8,13 @@
 package org.opendaylight.telemetry.configurator.impl;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.params.xml.ns.yang.configurator.api.rev171120.AddTelemetryDestinationOutput;
@@ -204,7 +205,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
             for (TelemetryDestinationGroup destinationGroup : destinationGroupList) {
                 if (null == destinationGroup.getDestinationProfile()
                         || destinationGroup.getDestinationProfile().isEmpty()) {
-                    builder.setConfigureResult(getConfigResult(false, destinationGroup.getDestinationGroupId() + DES_FILE));
+                    builder.setConfigureResult(getConfigResult(false, destinationGroup.getDestinationGroupId()
+                            + DES_FILE));
                     return RpcResultBuilder.success(builder.build()).build();
                 }
             }
@@ -267,7 +269,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
             ConfigureNodeTelemetrySubscriptionInput input) {
         return () -> {
             //check input
-            ConfigureNodeTelemetrySubscriptionOutputBuilder builder = new ConfigureNodeTelemetrySubscriptionOutputBuilder();
+            ConfigureNodeTelemetrySubscriptionOutputBuilder builder =
+                    new ConfigureNodeTelemetrySubscriptionOutputBuilder();
             if (null == input) {
                 builder.setConfigureResult(getConfigResult(false, INPUT_NULL));
                 return RpcResultBuilder.success(builder.build()).build();
@@ -359,7 +362,8 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
                         input.getTelemetryNode().get(i).getTelemetryNodeSubscription());
                 for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
                     configurationWriter.delSubscription(input.getTelemetryNode().get(i).getNodeId(),
-                            input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName());
+                            input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
+                                    .getSubscriptionName());
                 }
             }
 
@@ -402,9 +406,10 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
                     for (int k = 0; k < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
                             .getTelemetryNodeSubscriptionSensor().size(); k++) {
                         configurationWriter.delSubscriptionSensor(input.getTelemetryNode().get(i).getNodeId(),
-                                input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
                                 input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                                        .getTelemetryNodeSubscriptionSensor().get(k).getSensorGroupId());
+                                        .getSubscriptionName(), input.getTelemetryNode().get(i)
+                                        .getTelemetryNodeSubscription().get(j).getTelemetryNodeSubscriptionSensor()
+                                        .get(k).getSensorGroupId());
                     }
                 }
             }
@@ -442,14 +447,15 @@ public class ConfiguratorServiceImpl implements TelemetryConfiguratorApiService 
                 for (int j = 0; j < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().size(); j++) {
                     dataProcessor.deleteNodeSubscriptionDestinationFromDataStore(input.getTelemetryNode().get(i)
                             .getNodeId(), input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                            .getSubscriptionName(), input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                            .getTelemetryNodeSubscriptionDestination());
+                            .getSubscriptionName(), input.getTelemetryNode().get(i).getTelemetryNodeSubscription()
+                            .get(j).getTelemetryNodeSubscriptionDestination());
                     for (int k = 0; k < input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
                             .getTelemetryNodeSubscriptionDestination().size(); k++) {
                         configurationWriter.delSubscriptionDestination(input.getTelemetryNode().get(i).getNodeId(),
-                                input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j).getSubscriptionName(),
                                 input.getTelemetryNode().get(i).getTelemetryNodeSubscription().get(j)
-                                        .getTelemetryNodeSubscriptionDestination().get(k).getDestinationGroupId());
+                                        .getSubscriptionName(), input.getTelemetryNode().get(i)
+                                        .getTelemetryNodeSubscription().get(j).getTelemetryNodeSubscriptionDestination()
+                                        .get(k).getDestinationGroupId());
                     }
                 }
             }

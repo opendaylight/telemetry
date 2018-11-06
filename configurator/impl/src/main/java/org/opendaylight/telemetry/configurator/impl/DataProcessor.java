@@ -7,19 +7,19 @@
  */
 package org.opendaylight.telemetry.configurator.impl;
 
-import java.util.Optional;
+import com.google.common.util.concurrent.FluentFuture;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import com.google.common.util.concurrent.FluentFuture;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.binding.api.WriteTransaction;
-import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-//import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.mdsal.common.api.CommitInfo;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.paths.TelemetrySensorPaths;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.sensor.specification.TelemetrySensorGroup;
 import org.opendaylight.yang.gen.v1.http.openconfig.net.yang.telemetry.rev170824.telemetry.top.TelemetrySystem;
