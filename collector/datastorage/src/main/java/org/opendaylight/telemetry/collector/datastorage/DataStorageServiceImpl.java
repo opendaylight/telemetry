@@ -7,15 +7,22 @@
  */
 package org.opendaylight.telemetry.collector.datastorage;
 
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.yang.gen.v1.opendaylight.tsdr.rev150219.DataCategory;
 import org.opendaylight.yang.gen.v1.opendaylight.tsdr.rev150219.tsdrrecord.RecordKeys;
 import org.opendaylight.yang.gen.v1.opendaylight.tsdr.rev150219.tsdrrecord.RecordKeysBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.InsertTSDRMetricRecordInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.InsertTSDRMetricRecordOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.TsdrCollectorSpiService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.inserttsdrmetricrecord.input.TSDRMetricRecord;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.inserttsdrmetricrecord.input.TSDRMetricRecordBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -61,7 +68,7 @@ public class DataStorageServiceImpl implements TelemetryDatastorageService {
         LOG.error("Write data to TSDR failed, " + builder.toString());
     }
 
-    private Callable<RpcResult<Void>> writeDataToTSDR(DataStoreInput input) {
+    private Callable<ListenableFuture<RpcResult<InsertTSDRMetricRecordOutput>>> writeDataToTSDR(DataStoreInput input) {
         return () -> {
             InsertTSDRMetricRecordInputBuilder builder = new InsertTSDRMetricRecordInputBuilder();
             builder.setCollectorCodeName("Telemetry");
@@ -84,25 +91,25 @@ public class DataStorageServiceImpl implements TelemetryDatastorageService {
                     tsdrMetricRecordList.add(tsdrMetricRecordBuilder.build());
                 });
             });
-
             builder.setTSDRMetricRecord(tsdrMetricRecordList);
-            Future<RpcResult<Void>> future = tsdrCollectorSpiService.insertTSDRMetricRecord(builder.build());
-
-            try {
-                RpcResult<Void> rpcResult = future.get();
-                if (!rpcResult.isSuccessful()) {
-                    recordRpcErrors(rpcResult.getErrors());
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.error("Insert TSDR metric record exception, reason = {}.", e.getMessage());
-            }
-
-            return RpcResultBuilder.success(((Void)null)).build();
+            return tsdrCollectorSpiService.insertTSDRMetricRecord(builder.build());
         };
     }
 
     @Override
-    public Future<RpcResult<Void>> dataStore(DataStoreInput input) {
-        return executorService.submit(writeDataToTSDR(input));
+    public ListenableFuture<RpcResult<DataStoreOutput>> dataStore(DataStoreInput input) {
+        ListenableFuture<RpcResult<InsertTSDRMetricRecordOutput>> rpcResult;
+        try {
+            rpcResult = executorService.submit(writeDataToTSDR(input)).get();
+            if (!rpcResult.get().isSuccessful()) {
+                recordRpcErrors(rpcResult.get().getErrors());
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Insert TSDR metric record exception, reason = {}.", e.getMessage());
+            return null;
+        }
+        return Futures.transform(rpcResult, insertTSDRMetricRecordOutputRpcResult -> {
+            return null;});
+
     }
 }
