@@ -29,9 +29,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </scm>
 
   <modules>
-<!--
     <module>collector</module>
--->
     <module>configurator</module>
 <!--
     <module>simulator</module>

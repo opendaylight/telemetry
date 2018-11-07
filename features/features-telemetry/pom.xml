@@ -29,7 +29,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </properties>
 
   <dependencies>
-<!--
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>odl-telemetry-collector</artifactId>
@@ -37,7 +36,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <type>xml</type>
       <classifier>features</classifier>
     </dependency>
--->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>odl-telemetry-configurator</artifactId>

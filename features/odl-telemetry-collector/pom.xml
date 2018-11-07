@@ -76,7 +76,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <dependency>
             <groupId>org.opendaylight.tsdr</groupId>
             <artifactId>odl-tsdr-hsqldb-all</artifactId>
-            <version>1.6.0-SNAPSHOT</version>
+            <version>1.6.1-SNAPSHOT</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -90,13 +90,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <artifactId>collector-dataserver</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>console</artifactId>
             <version>${project.version}</version>
         </dependency>
-        -->
     </dependencies>
 
 </project>

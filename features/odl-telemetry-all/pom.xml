@@ -23,7 +23,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     <name>ODL :: telemetry :: ${project.artifactId} [Karaf Feature]</name>
 
     <dependencies>
-<!--
         <dependency>
             <groupId>org.opendaylight.telemetry</groupId>
             <artifactId>odl-telemetry-collector</artifactId>
@@ -31,7 +30,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
--->
         <dependency>
             <groupId>org.opendaylight.telemetry</groupId>
             <artifactId>odl-telemetry-configurator</artifactId>
