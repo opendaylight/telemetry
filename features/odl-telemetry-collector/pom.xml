@@ -33,13 +33,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.netconf</groupId>
-                <artifactId>netconf-artifacts</artifactId>
-                <version>1.5.1-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.netconf</groupId>
                 <artifactId>restconf-artifacts</artifactId>
                 <version>1.8.1-SNAPSHOT</version>
                 <type>pom</type>
@@ -52,12 +45,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-dom-broker</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.netconf</groupId>
-            <artifactId>odl-netconf-console</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
