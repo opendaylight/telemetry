@@ -59,19 +59,20 @@ public class DataServerImpl {
             String nodeId = telemetryStreamRequest.getNodeId();
             List<TelemetryData> telemetryDataList = new ArrayList<>();
 
-            for(RequestField requestField : telemetryStreamRequest.getFieldsList()) {
+            for (RequestField requestField : telemetryStreamRequest.getFieldsList()) {
                 TelemetryDataBuilder telemetryDataBuilder = new TelemetryDataBuilder();
                 List<org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326
                         .telemetry.data.model.telemetry.data.KeyValue> keyValueList = new ArrayList<>();
 
-                for(KeyValue keyValue : requestField.getKvList()) {
+                for (KeyValue keyValue : requestField.getKvList()) {
                     org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326
                             .telemetry.data.model.telemetry.data.KeyValueBuilder keyValueBuilder =
                             new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326
                                     .telemetry.data.model.telemetry.data.KeyValueBuilder();
                     keyValueBuilder.setKey(keyValue.getKey());
                     keyValueBuilder.setValue(new org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage
-                            .rev180326.telemetry.data.model.telemetry.data.KeyValue.Value(keyValue.getValue().getUint64Val()));
+                            .rev180326.telemetry.data.model.telemetry.data.KeyValue.Value(keyValue.getValue()
+                            .getUint64Val()));
                     keyValueList.add(keyValueBuilder.build());
                 }
                 telemetryDataBuilder.setBasePath(requestField.getBasePath());
@@ -87,7 +88,8 @@ public class DataServerImpl {
             //RPCFutures.logResult(future, "data-storage", LOG);
         }
 
-        public StreamObserver<TelemetryStreamRequest> publish(StreamObserver<TelemetryStreamResponse> responseObserver) {
+        public StreamObserver<TelemetryStreamRequest> publish(StreamObserver<TelemetryStreamResponse>
+                                                                      responseObserver) {
             return new StreamObserver<TelemetryStreamRequest>() {
                 @Override
                 public void onNext(TelemetryStreamRequest telemetryStreamRequest) {
