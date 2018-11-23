@@ -26,6 +26,7 @@ public class TelemetryNotificationImpl {
     private Disruptor<TelemetryEvent> disruptor;
     private TelemetryEventProducer producer;
     private TelemetryEventConsumer consumer;
+    private int consumerSize = 3;
 
     private TelemetryNotificationImpl() {
         init();
@@ -46,7 +47,11 @@ public class TelemetryNotificationImpl {
         WaitStrategy waitStrategy = new YieldingWaitStrategy();
         Integer BUFFER_SIZE = 2048;
         disruptor = new Disruptor<>(FACTORY, BUFFER_SIZE, threadFactory, ProducerType.SINGLE, waitStrategy);
-        disruptor.handleEventsWith(consumer);
+        TelemetryEventConsumer[] consumers = new TelemetryEventConsumer[2];
+        for (int i = 0; i < consumerSize; i++) {
+            consumers[i] = new TelemetryEventConsumer();
+        }
+        disruptor.handleEventsWithWorkerPool(consumers);
         disruptor.start();
     }
 

@@ -31,9 +31,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <modules>
     <module>collector</module>
     <module>configurator</module>
-<!--
     <module>simulator</module>
--->
     <module>features</module>
     <module>console</module>
     <module>karaf</module>
