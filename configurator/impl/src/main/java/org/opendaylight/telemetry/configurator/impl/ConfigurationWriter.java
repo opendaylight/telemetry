@@ -143,10 +143,10 @@ public class ConfigurationWriter {
         switch (type) {
             case CREATE:
             case REPLACE:
-                writeTransaction.put(LogicalDatastoreType.CONFIGURATION,path,data,true);
+                writeTransaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION,path,data);
                 break;
             case MERGE:
-                writeTransaction.merge(LogicalDatastoreType.CONFIGURATION,path,data,true);
+                writeTransaction.mergeParentStructureMerge(LogicalDatastoreType.CONFIGURATION,path,data);
                 break;
             case DELETE:
                 writeTransaction.delete(LogicalDatastoreType.CONFIGURATION, path);
@@ -220,5 +220,4 @@ public class ConfigurationWriter {
         }
         return null;
     }
-
 }

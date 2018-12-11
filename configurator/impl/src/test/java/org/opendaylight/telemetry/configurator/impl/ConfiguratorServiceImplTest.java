@@ -502,7 +502,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         list.add(pathsBuilder.build());
         builder.setTelemetrySensorPaths(list);
 
-        tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
+        tx.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build());
         try {
             tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
@@ -562,7 +562,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         list.add(profileBuilder.build());
         builder.setDestinationProfile(list);
 
-        tx.put(LogicalDatastoreType.CONFIGURATION, desGroupPath, builder.build(), true);
+        tx.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, desGroupPath, builder.build());
         try {
             tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {
@@ -659,7 +659,7 @@ public class ConfiguratorServiceImplTest extends AbstractConcurrentDataBrokerTes
         destinationList.add(destinationBuilder.build());
         builder.setTelemetryDestination(destinationList);
 
-        tx.put(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build(), true);
+        tx.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, sensorGroupPath, builder.build());
         try {
             tx.commit().get();
         } catch (InterruptedException | ExecutionException e) {

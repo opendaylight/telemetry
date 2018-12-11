@@ -168,10 +168,10 @@ public class DataProcessor {
         final WriteTransaction writeTransaction = dataBroker.newWriteOnlyTransaction();
         switch (type) {
             case ADD:
-                writeTransaction.put(LogicalDatastoreType.CONFIGURATION, path, data, true);
+                writeTransaction.mergeParentStructurePut(LogicalDatastoreType.CONFIGURATION, path, data);
                 break;
             case MODIFY:
-                writeTransaction.merge(LogicalDatastoreType.CONFIGURATION, path, data, true);
+                writeTransaction.mergeParentStructureMerge(LogicalDatastoreType.CONFIGURATION, path, data);
                 break;
             case DELETE:
                 writeTransaction.delete(LogicalDatastoreType.CONFIGURATION, path);
@@ -238,7 +238,7 @@ public class DataProcessor {
 
     private List<TelemetryDestinationGroup> destinationDetail(List<TelemetryDestination> destinationList,
                                                               List<TelemetryDestinationGroup> destinationGroupList) {
-        List<TelemetryDestinationGroup> list = new ArrayList();
+        List<TelemetryDestinationGroup> list = new ArrayList<>();
         for (int i = 0; i < destinationList.size(); i++) {
             for (int j = 0; j < destinationGroupList.size(); j++) {
                 if (destinationList.get(i).getDestinationGroupId().equals(destinationGroupList.get(j)
