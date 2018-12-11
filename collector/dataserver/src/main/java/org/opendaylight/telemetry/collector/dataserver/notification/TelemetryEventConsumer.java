@@ -27,7 +27,7 @@ public class TelemetryEventConsumer implements EventHandler<TelemetryEvent>,Work
         for(StreamDataHandler handler : subscribers) {
             handler.process(event.getValue());
         }
-        consumeCount.incrementAndGet();
+        consumeCount = incrementAndGet(consumeCount);
     }
 
     public void addSubscriber(StreamDataHandler handler) {
@@ -48,6 +48,17 @@ public class TelemetryEventConsumer implements EventHandler<TelemetryEvent>,Work
         for(StreamDataHandler handler : subscribers) {
             handler.process(telemetryEvent.getValue());
         }
-        consumeCount.incrementAndGet();
+        consumeCount = incrementAndGet(consumeCount);
+    }
+    public final AtomicInteger incrementAndGet(final AtomicInteger value) {
+        int current;
+        int next;
+        do {
+            current = value.get();
+            next = current >= Integer.MAX_VALUE ? 0 : current + 1;
+        }while(!value.compareAndSet(current,next));
+
+        return new AtomicInteger(next);
+
     }
 }
