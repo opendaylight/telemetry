@@ -7,11 +7,19 @@
  */
 package org.opendaylight.telemetry.collector.dataserver.notification;
 
+import com.google.common.collect.Lists;
 import org.opendaylight.telemetry.proto.TelemetryStreamRequest;
 
-public final class TelemetryNotification {
-    private static TelemetryNotificationImpl instance = TelemetryNotificationImpl.getInstance();
+import java.util.List;
 
+public final class TelemetryNotification {
+    private static List<StreamDataHandler> handlers = Lists.newArrayList();
+    private static TelemetryNotificationImpl instance = TelemetryNotificationImpl.getInstance();
+    //register default processer of stream handler to stream handler map.
+    static {
+        handlers.add(new StreamDataHandlerImpl());
+        handlers.forEach(streamDataHandler -> TelemetryNotification.subscribe(streamDataHandler));
+    }
     public static void subscribe(StreamDataHandler handler) {
         instance.subscribe(handler);
     }
@@ -27,6 +35,7 @@ public final class TelemetryNotification {
     }
 
     public static void shutdown() {
+        handlers.forEach(streamDataHandler -> TelemetryNotification.unsubscribe(streamDataHandler));
         instance.shutdown();
     }
 
