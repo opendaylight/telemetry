@@ -20,6 +20,7 @@ public class DataClientProvider {
     private ExecutorService executorService;
     private int sample_interval;
     private int port;
+    private static Boolean SENDER = false;
 
     public DataClientProvider() {
         this.sample_interval = 5 * 1000;
@@ -30,7 +31,9 @@ public class DataClientProvider {
         this.client = new DataClientImpl("localhost", port);
         this.executorService = Executors.newFixedThreadPool(1);
         waitServerStart();
-        executorService.submit(task());
+        if(SENDER) {
+            executorService.submit(task());
+        }
     }
 
     public void close() {
@@ -57,6 +60,9 @@ public class DataClientProvider {
         await(60 * 1000);
     }
 
+    public static void setSwitch(Boolean debug) {
+        DataClientProvider.SENDER = debug;
+    }
     private void await(long milliseconds) {
         try {
             Thread.sleep(milliseconds);

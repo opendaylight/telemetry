@@ -8,20 +8,23 @@ terms of the Eclipse Public License v1.0 which accompanies this distribution,
 and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-  xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
-  odl:restart-dependents-on-updates="true" odl:use-default-for-reference-types="true">
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           odl:restart-dependents-on-updates="true" odl:use-default-for-reference-types="true">
 
-  <bean id="telemetryCommandsImpl"
-    class="org.opendaylight.telemetry.console.impl.TelemetryCommandsImpl">
-  </bean>
+    <bean id="telemetryCommandsImpl"
+          class="org.opendaylight.telemetry.console.impl.TelemetryCommandsImpl">
+    </bean>
 
-  <service ref="telemetryCommandsImpl" interface="org.opendaylight.telemetry.console.api.TelemetryCommands" />
+    <service ref="telemetryCommandsImpl" interface="org.opendaylight.telemetry.console.api.TelemetryCommands" />
 
-  <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-    <command name="telemetry:list">
-        <action class="org.opendaylight.telemetry.console.commands.TelemetryListStats">
-            <argument ref="telemetryCommandsImpl" />
-        </action>
-    </command>
-  </command-bundle>
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
+        <command name="telemetry:list">
+            <action class="org.opendaylight.telemetry.console.commands.TelemetryListStats">
+                <argument ref="telemetryCommandsImpl" />
+            </action>
+        </command>
+        <command name="telemetry:test">
+            <action class="org.opendaylight.telemetry.console.commands.TelemetrySimulatorCommand"/>
+        </command>
+    </command-bundle>
 </blueprint>

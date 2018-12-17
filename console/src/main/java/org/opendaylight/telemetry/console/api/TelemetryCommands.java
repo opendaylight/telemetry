@@ -9,4 +9,6 @@ package org.opendaylight.telemetry.console.api;
 
 public interface TelemetryCommands {
     String listStats(String endpoint);
+
+    boolean switchSender(boolean debug);
 }

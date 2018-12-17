@@ -8,6 +8,7 @@
 package org.opendaylight.telemetry.console.impl;
 
 import org.opendaylight.telemetry.console.api.TelemetryCommands;
+import org.opendaylight.telemetry.simulator.dataclient.client.DataClientProvider;
 
 public class TelemetryCommandsImpl implements TelemetryCommands {
     public TelemetryCommandsImpl() {}
@@ -15,5 +16,11 @@ public class TelemetryCommandsImpl implements TelemetryCommands {
     @Override
     public String listStats(String endpoint) {
         return null;
+    }
+
+    @Override
+    public boolean switchSender(boolean debug) {
+        DataClientProvider.setSwitch(debug);
+        return true;
     }
 }

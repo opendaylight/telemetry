@@ -24,8 +24,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <name>ODL :: telemetry :: ${project.artifactId}</name>
 
   <properties>
-    <karaf.localFeature>odl-telemetry-all</karaf.localFeature>
+      <karaf.localFeature>odl-telemetry-all</karaf.localFeature>
+      <!--karaf.localFeature>odl-telemetry-test</karaf.localFeature-->
   </properties>
+
 
   <dependencies>
     <dependency>
