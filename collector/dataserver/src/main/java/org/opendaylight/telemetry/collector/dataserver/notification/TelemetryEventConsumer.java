@@ -17,34 +17,29 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TelemetryEventConsumer implements EventHandler<TelemetryEvent>,WorkHandler<TelemetryEvent> {
-    private final String TELEMETRY_DATA = "TD";
-    private volatile Multimap<String, StreamDataHandler> map = ArrayListMultimap.create();
+    private String TELEMETRY_DATA;
     private AtomicInteger consumeCount = new AtomicInteger(0);
 
     @Override
     public void onEvent(TelemetryEvent event, long sequence, boolean endOfBatch) throws Exception {
-        Collection<StreamDataHandler> subscribers = map.get(TELEMETRY_DATA);
+        Collection<StreamDataHandler> subscribers = StreamHandlerRegistryMap.getHandlerMap()
+                .get(TELEMETRY_DATA);
         for(StreamDataHandler handler : subscribers) {
             handler.process(event.getValue());
         }
         consumeCount = incrementAndGet(consumeCount);
     }
 
-    public void addSubscriber(StreamDataHandler handler) {
-        map.put(TELEMETRY_DATA, handler);
-    }
-
-    public void removeSubscriber(StreamDataHandler handler) {
-        map.get(TELEMETRY_DATA).remove(handler);
-    }
-
     public String getConsumeCount() {
         return consumeCount.toString();
     }
-
+    public void setComsumeHandlerKey(String key) {
+        this.TELEMETRY_DATA = key;
+    }
     @Override
     public void onEvent(TelemetryEvent telemetryEvent) throws Exception {
-        Collection<StreamDataHandler> subscribers = map.get(TELEMETRY_DATA);
+        Collection<StreamDataHandler> subscribers = StreamHandlerRegistryMap.getHandlerMap()
+                .get(TELEMETRY_DATA);
         for(StreamDataHandler handler : subscribers) {
             handler.process(telemetryEvent.getValue());
         }

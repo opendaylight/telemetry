@@ -27,6 +27,7 @@ public class TelemetryNotificationImpl {
     private TelemetryEventProducer producer;
     private TelemetryEventConsumer consumer;
     private int consumerSize = 3;
+    private static final String TELEMETRY_DATA = "TD";
 
     private TelemetryNotificationImpl() {
         init();
@@ -49,6 +50,8 @@ public class TelemetryNotificationImpl {
         disruptor = new Disruptor<>(FACTORY, BUFFER_SIZE, threadFactory, ProducerType.SINGLE, waitStrategy);
         TelemetryEventConsumer[] consumers = new TelemetryEventConsumer[2];
         for (int i = 0; i < consumerSize; i++) {
+            TelemetryEventConsumer consumer = new TelemetryEventConsumer();
+            consumer.setComsumeHandlerKey(TELEMETRY_DATA);
             consumers[i] = new TelemetryEventConsumer();
         }
         disruptor.handleEventsWithWorkerPool(consumers);
@@ -69,11 +72,11 @@ public class TelemetryNotificationImpl {
     }
 
     public void subscribe(StreamDataHandler handler) {
-        consumer.addSubscriber(handler);
+        StreamHandlerRegistryMap.registryHandlerMap(handler);
     }
 
     public void unsubscribe(StreamDataHandler handler) {
-        consumer.removeSubscriber(handler);
+        StreamHandlerRegistryMap.unRegistryHandlerMap(handler);
     }
 
     public void shutdown() {
