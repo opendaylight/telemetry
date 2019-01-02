@@ -13,9 +13,14 @@ import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainClosedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import javax.annotation.concurrent.GuardedBy;
+
+import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +48,7 @@ public class TransactionChainManager implements TransactionChainListener {
         }
     }
 
-    void activateTransactionManager() {
+    public void activateTransactionManager() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("activateTransactionManager for node {}", this.nodeId);
         }
@@ -51,7 +56,29 @@ public class TransactionChainManager implements TransactionChainListener {
             createTxChain();
         }
     }
+    <T extends DataObject> void addDeleteOperationTotTxChain(final LogicalDatastoreType store,
+                                                             final InstanceIdentifier<T> path){
+        synchronized (txLock) {
+            if (wTx == null) {
+                LOG.debug("WriteTx is null for node {}. Delete {} was not realized.", this.nodeId, path);
+                throw new TransactionChainClosedException(CANNOT_WRITE_INTO_TRANSACTION);
+            }
 
+            wTx.delete(store, path);
+        }
+    }
+    <T extends DataObject> void writeToTransaction(final LogicalDatastoreType store,
+                                                   final InstanceIdentifier<T> path,
+                                                   final T data,
+                                                   final boolean createParents){
+        synchronized (txLock) {
+            if (wTx == null) {
+                LOG.debug("WriteTx is null for node {}. Write data for {} was not realized.", this.nodeId, path);
+                throw new TransactionChainClosedException(CANNOT_WRITE_INTO_TRANSACTION);
+            }
+            wTx.put(store, path, data, createParents);
+        }
+    }
     @Override
     public void onTransactionChainSuccessful(@Nonnull TransactionChain chain) {
         LOG.debug("transtion chain successful.");
