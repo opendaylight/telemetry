@@ -9,6 +9,9 @@ package org.opendaylight.telemetry.console.impl;
 
 import org.opendaylight.telemetry.console.api.TelemetryCommands;
 import org.opendaylight.telemetry.simulator.dataclient.client.DataClientProvider;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.telemetry.data.model.TelemetryData;
+
+import java.util.List;
 
 public class TelemetryCommandsImpl implements TelemetryCommands {
     public TelemetryCommandsImpl() {}
@@ -22,5 +25,10 @@ public class TelemetryCommandsImpl implements TelemetryCommands {
     public boolean switchSender(boolean debug) {
         DataClientProvider.setSwitch(debug);
         return true;
+    }
+
+    @Override
+    public List<TelemetryData> getTelemetryData() {
+        return null;
     }
 }

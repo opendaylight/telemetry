@@ -24,7 +24,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             </action>
         </command>
         <command name="telemetry:test">
-            <action class="org.opendaylight.telemetry.console.commands.TelemetrySimulatorCommand"/>
+            <action class="org.opendaylight.telemetry.console.commands.TelemetrySimulatorCommand">
+                <argument ref="telemetryCommandsImpl" />
+            </action>
+        </command>
+        <command name="telemetry:query">
+            <action class="org.opendaylight.telemetry.console.commands.QueryData">
+                <argument ref="telemetryCommandsImpl" />
+            </action>
         </command>
     </command-bundle>
 </blueprint>

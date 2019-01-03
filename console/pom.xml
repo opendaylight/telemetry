@@ -43,6 +43,11 @@
       <artifactId>collector-dataserver</artifactId>
       <version>${project.version}</version>
     </dependency>
+      <dependency>
+          <groupId>org.opendaylight.telemetry</groupId>
+          <artifactId>collector-datastorage</artifactId>
+          <version>${project.version}</version>
+      </dependency>
     <dependency>
       <groupId>org.opendaylight.telemetry</groupId>
       <artifactId>simulator-dataclient</artifactId>
