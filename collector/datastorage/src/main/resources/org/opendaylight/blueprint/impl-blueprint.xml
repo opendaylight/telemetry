@@ -22,6 +22,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <!--
   <odl:rpc-service id = "insertMetric" interface="org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.tsdr.collector.spi.rev150915.TsdrCollectorSpiService"/>
   -->
+  <bean id="dataService"
+    class="org.opendaylight.telemetry.collector.datastorage.service.DataOperationService"
+    init-method="init" destroy-method="close"/>
+  <service ref="dataService" interface="org.opendaylight.telemetry.collector.datastorage.service.DataOperation"/>
 
   <bean id="datastorage"
     class="org.opendaylight.telemetry.collector.datastorage.DataStorageServiceImpl"
