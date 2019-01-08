@@ -30,9 +30,18 @@ public class TelemetrySimulatorCommand extends AbstractAction {
             required = true,
             multiValued = false)
     private boolean test = false;
-
+    @Option(name = "-h",
+            aliases = {"--help"},
+            description = "help.",
+            required = false,
+            multiValued = false)
+    private String help;
     @Override
     protected Object doExecute() throws Exception {
+        if (help != null && !help.isEmpty()) {
+            System.out.println("set data simulator switch..please use telemetry:test -t.");
+            return  null;
+        }
         System.out.println("execute simulator test.");
         return service.switchSender(test);
     }

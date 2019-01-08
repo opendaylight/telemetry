@@ -29,8 +29,18 @@ public class QueryData extends AbstractAction {
             required = true,
             multiValued = false)
     private String all;
+    @Option(name = "-h",
+            aliases = {"--help"},
+            description = "help.",
+            required = false,
+            multiValued = false)
+    private String help;
     @Override
     protected Object doExecute() throws Exception {
+        if (help != null && !help.isEmpty()) {
+            System.out.println("query telemetry data.please use telemetry:query -all.");
+            return  null;
+        }
         System.out.println("execute action of querying data.");
         service.getTelemetryData();
         return null;

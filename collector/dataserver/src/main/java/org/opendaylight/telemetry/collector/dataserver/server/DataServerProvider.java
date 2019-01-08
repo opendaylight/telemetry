@@ -45,5 +45,4 @@ public class DataServerProvider {
         LOG.info("Telemetry data server closed.");
     }
 
-
 }
