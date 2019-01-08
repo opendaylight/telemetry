@@ -7,7 +7,7 @@
  */
 package org.opendaylight.telemetry.simulator.dataclient.client;
 
-import io.grpc.ConnectivityState;
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +15,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DataClientProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(DataClientProvider.class);
     private DataClientImpl client;
     private ExecutorService executorService;
     private int sample_interval;
     private int port;
     private static Boolean SENDER = false;
+    private static final Logger LOG = LoggerFactory.getLogger(DataClientProvider.class);
 
     public DataClientProvider() {
         this.sample_interval = 5 * 1000;
@@ -31,7 +31,7 @@ public class DataClientProvider {
         this.client = new DataClientImpl("localhost", port);
         this.executorService = Executors.newFixedThreadPool(1);
         waitServerStart();
-        if(SENDER) {
+        if (SENDER) {
             executorService.submit(task());
         }
     }
@@ -51,7 +51,11 @@ public class DataClientProvider {
         return () -> {
             while (true) {
                 await(sample_interval);
-                client.publish();
+                try {
+                    client.publish();
+                } catch (StatusRuntimeException e) {
+                    LOG.warn("send client data exception.{}",e.getStatus());
+                }
             }
         };
     }
@@ -63,6 +67,7 @@ public class DataClientProvider {
     public static void setSwitch(Boolean debug) {
         DataClientProvider.SENDER = debug;
     }
+
     private void await(long milliseconds) {
         try {
             Thread.sleep(milliseconds);
