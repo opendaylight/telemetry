@@ -19,5 +19,6 @@ public class StreamDataHandlerImpl implements StreamDataHandler{
     @Override
     public void process(TelemetryStreamRequest data) {
         LOG.trace("consume request of stream:{}",data);
+
     }
 }

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.telemetry.collector.dataserver.server;
 
+import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,7 @@ public class DataServerProvider {
         if (server != null) {
             server.stop();
         }
+        TelemetryNotification.shutdown();
         LOG.info("Telemetry data server closed.");
     }
 
