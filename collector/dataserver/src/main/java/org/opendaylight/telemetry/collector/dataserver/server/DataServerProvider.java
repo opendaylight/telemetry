@@ -7,6 +7,7 @@
  */
 package org.opendaylight.telemetry.collector.dataserver.server;
 
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotification;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class DataServerProvider {
     private final TelemetryDatastorageService datastorageService;
     private final int port = 50051;
     private DataServerImpl server;
+    private NotificationPublishService notificationProvider;
 
     /**
      * No support config specific tcp port currently.
@@ -46,5 +48,7 @@ public class DataServerProvider {
         TelemetryNotification.shutdown();
         LOG.info("Telemetry data server closed.");
     }
-
+    public void setNotificationProvider(final NotificationPublishService notificationPublishService) {
+        this.notificationProvider = notificationPublishService;
+    }
 }
