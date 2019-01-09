@@ -9,6 +9,7 @@ package org.opendaylight.telemetry.collector.dataserver.server;
 
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotification;
+import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotificationImpl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ public class DataServerProvider {
             server = new DataServerImpl(port, datastorageService);
             server.start();
             LOG.info("Telemetry data server started, listening on port " + port);
+            TelemetryNotificationImpl.getInstance().setNotificationProvider(notificationProvider);
         } catch (IOException e) {
             LOG.error("Telemetry data server start failed.");
             e.printStackTrace();

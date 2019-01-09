@@ -12,6 +12,7 @@ import com.lmax.disruptor.WaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.telemetry.proto.TelemetryStreamRequest;
 import java.util.concurrent.ThreadFactory;
 
@@ -28,6 +29,7 @@ public class TelemetryNotificationImpl {
     private TelemetryEventConsumer consumer;
     private int consumerSize = 3;
     private static final String TELEMETRY_DATA = "TD";
+    private NotificationPublishService notificationProvider;
 
     private TelemetryNotificationImpl() {
         init();
@@ -48,7 +50,7 @@ public class TelemetryNotificationImpl {
         WaitStrategy waitStrategy = new YieldingWaitStrategy();
         Integer BUFFER_SIZE = 2048;
         disruptor = new Disruptor<>(FACTORY, BUFFER_SIZE, threadFactory, ProducerType.SINGLE, waitStrategy);
-        TelemetryEventConsumer[] consumers = new TelemetryEventConsumer[2];
+        TelemetryEventConsumer[] consumers = new TelemetryEventConsumer[3];
         for (int i = 0; i < consumerSize; i++) {
             TelemetryEventConsumer consumer = new TelemetryEventConsumer();
             consumer.setComsumeHandlerKey(TELEMETRY_DATA);
@@ -96,4 +98,13 @@ public class TelemetryNotificationImpl {
     public String getConsumeCount() {
         return consumer.getConsumeCount();
     }
+
+    public NotificationPublishService getNotificationProvider() {
+        return notificationProvider;
+    }
+
+    public void setNotificationProvider(NotificationPublishService notificationProvider) {
+        this.notificationProvider = notificationProvider;
+    }
+
 }
