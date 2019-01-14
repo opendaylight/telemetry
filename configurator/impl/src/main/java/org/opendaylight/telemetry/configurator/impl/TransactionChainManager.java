@@ -95,7 +95,9 @@ public class TransactionChainManager implements TransactionChainListener {
 
     @GuardedBy("txLock")
     private void createTxChain() {
-        txChainFactory = dataBroker.createTransactionChain(TransactionChainManager.this);
+        if (txChainFactory == null) {
+            txChainFactory = dataBroker.createTransactionChain(TransactionChainManager.this);
+        }
     }
 
     @Override
