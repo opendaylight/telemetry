@@ -54,9 +54,6 @@ public class TransactionChainManager implements TransactionChainListener {
                             @Nonnull final String nodeIp) {
         this.dataBroker = dataBroker;
         this.nodeId = nodeIp;
-        synchronized (txLock) {
-            createTxChain();
-        }
     }
 
     public void activateTransactionManager() {
