@@ -85,7 +85,7 @@ public class DataServerImpl {
             inputBuilder.setNodeId(nodeId);
             inputBuilder.setTelemetryData(telemetryDataList);
             ListenableFuture<RpcResult<DataStoreOutput>> future = datastorageService.dataStore(inputBuilder.build());
-            //RPCFutures.logResult(future, "data-storage", LOG);
+            RPCFutures.logResult(future, "data-storage", LOG);
         }
 
         public StreamObserver<TelemetryStreamRequest> publish(StreamObserver<TelemetryStreamResponse>

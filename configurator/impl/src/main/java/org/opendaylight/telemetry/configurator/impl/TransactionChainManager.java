@@ -8,9 +8,8 @@
 package org.opendaylight.telemetry.configurator.impl;
 
 
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
@@ -19,20 +18,11 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainClosedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
-import java.util.Objects;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author: li.jiansong
@@ -50,8 +40,8 @@ public class TransactionChainManager implements TransactionChainListener {
     @GuardedBy("txLock")
     private WriteTransaction wTx;
 
-    TransactionChainManager(@Nonnull final DataBroker dataBroker,
-                            @Nonnull final String nodeIp) {
+    TransactionChainManager(@NonNull final DataBroker dataBroker,
+                            @NonNull final String nodeIp) {
         this.dataBroker = dataBroker;
         this.nodeId = nodeIp;
     }
@@ -88,7 +78,7 @@ public class TransactionChainManager implements TransactionChainListener {
         }
     }
     @Override
-    public void onTransactionChainSuccessful(@Nonnull TransactionChain chain) {
+    public void onTransactionChainSuccessful(@NonNull TransactionChain chain) {
         LOG.debug("transtion chain successful.");
         wTx = null;
     }
@@ -110,56 +100,10 @@ public class TransactionChainManager implements TransactionChainListener {
     }
 
     @GuardedBy("txLock")
-    @Nullable
     private void ensureTransaction() {
         if (wTx == null && txChainFactory != null) {
             wTx = txChainFactory.newWriteOnlyTransaction();
         }
-    }
-
-    boolean submitWriteTransaction() {
-        synchronized (txLock) {
-            if (Objects.isNull(wTx)) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("nothing to commit - submit returns true");
-                }
-                return true;
-            }
-
-            final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = wTx.submit();
-            wTx = null;
-            if (initCommit) {
-                try {
-                    submitFuture.get(5L, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException ex) {
-                    LOG.error("Exception during INITIAL transaction submitting. ", ex);
-                    return false;
-                }
-                initCommit = false;
-                return true;
-            }
-
-            Futures.addCallback(submitFuture, new FutureCallback<Void>() {
-                @Override
-                public void onSuccess(final Void result) {
-                    //NOOP
-                }
-                @Override
-                public void onFailure(final Throwable t) {
-                    if (t instanceof TransactionCommitFailedException) {
-                        LOG.error("Transaction commit failed. ", t);
-                    } else {
-                        if (t instanceof CancellationException) {
-                            LOG.warn("Submit task was canceled");
-                            LOG.trace("Submit exception: ", t);
-                        } else {
-                            LOG.error("Exception during transaction submitting. ", t);
-                        }
-                    }
-                }
-            });
-        }
-        return true;
     }
 
 }

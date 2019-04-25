@@ -7,7 +7,7 @@
  */
 package org.opendaylight.telemetry.collector.dataserver.server;
 
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotification;
 import org.opendaylight.telemetry.collector.dataserver.notification.TelemetryNotificationImpl;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.TelemetryDatastorageService;

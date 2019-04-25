@@ -12,18 +12,20 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.MoreExecutors;
+
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.telemetry.datastorage.rev180326.DataStoreOutput;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.Future;
 
 
 public final class RPCFutures {
-    public static void logResult(Future<RpcResult<Void>> future, String rpc, Logger logger) {
-        Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future), new FutureCallback<RpcResult<Void>>() {
+    public static void logResult(Future<RpcResult<DataStoreOutput>> future, String rpc, Logger logger) {
+        Futures.addCallback(JdkFutureAdapters.listenInPoolThread(future), new FutureCallback<RpcResult<DataStoreOutput>>() {
             @Override
-            public void onSuccess(@Nullable RpcResult<Void> voidRpcResult) {
+            public void onSuccess(@Nullable RpcResult<DataStoreOutput> voidRpcResult) {
                 logger.info("RPC {} success.", rpc);
             }
 
