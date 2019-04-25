@@ -14,7 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>binding-parent</artifactId>
-        <version>3.0.6</version>
+        <version>4.0.0</version>
         <relativePath/>
     </parent>
 
@@ -35,13 +35,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>mdsal-artifacts</artifactId>
-                <version>1.9.1-SNAPSHOT</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
@@ -71,10 +64,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-binding-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
