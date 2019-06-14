@@ -17,7 +17,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
 
     <groupId>org.opendaylight.telemetry</groupId>
     <artifactId>odl-telemetry-collector</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>feature</packaging>
 
     <name>ODL :: telemetry :: ${project.artifactId} [Karaf Feature]</name>
@@ -34,7 +34,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
             <dependency>
                 <groupId>org.opendaylight.netconf</groupId>
                 <artifactId>restconf-artifacts</artifactId>
-                <version>1.9.1-SNAPSHOT</version>
+                <version>1.9.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
