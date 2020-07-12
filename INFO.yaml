@@ -1,0 +1,68 @@
+---
+project: 'telemetry'
+project_creation_date: '2018-03-14'
+project_category: ''
+lifecycle_state: 'Incubation'
+project_lead: &odl_telemetry_ptl
+    name: 'wang senxiao'
+    email: '10200860@zte.com.cn'
+    company: 'zte.com'
+    id: 'wsx25289'
+    timezone: 'Unknown/Unknown'
+primary_contact: *odl_telemetry_ptl
+issue_tracking:
+    type: 'jira'
+    url: 'https://jira.opendaylight.org/projects/'
+    key: 'telemetry'
+mailing_list:
+    type: 'groups.io'
+    url: 'app-dev@lists.opendaylight.org'
+    tag: '[]'
+realtime_discussion:
+    type: 'irc'
+    server: 'freenode.net'
+    channel: '#opendaylight'
+meetings:
+    - type: 'gotomeeting+irc'
+      agenda: 'https://wiki.opendaylight.org'
+      url: ''
+      server: 'freenode.net'
+      channel: '#opendaylight'
+      repeats: ''
+      time: ''
+repositories:
+    - telemetry
+committers:
+    - <<: *odl_telemetry_ptl
+    - name: 'Ding Rui'
+      email: 'ding.rui@zte.com.cn'
+      company: 'zte.com'
+      id: 'dingrui'
+      timezone: 'Unknown/Unknown'
+    - name: 'Wang Senxiao'
+      email: 'wang.senxiao@zte.com.cn'
+      company: 'zte.com'
+      id: 'wangsenxiao'
+      timezone: 'Unknown/Unknown'
+    - name: 'wang senxiao'
+      email: '10200860@zte.com.cn'
+      company: 'zte.com'
+      id: 'wsx25289'
+      timezone: 'Unknown/Unknown'
+    - name: 'huan linying'
+      email: 'huan.linying@zte.com.cn'
+      company: 'zte.com'
+      id: 'huanlinying'
+      timezone: 'Unknown/Unknown'
+    - name: 'li jiansong'
+      email: 'lijiansong@chinatelecom.cn'
+      company: 'chinatelecom'
+      id: 'lijiansong77'
+      timezone: 'Unknown/Unknown'
+tsc:
+    # yamllint disable rule:line-length
+    approval: ''
+    changes:
+        - type: 'NA'
+          name: ''
+          link: ''
